@@ -41,7 +41,7 @@ def create_service(src: str | Path, dest: str | Path) -> bool:
         return True
     except subprocess.CalledProcessError:
         return False
-    
+
 
 def enable_and_start_service(service_name: str) -> bool:
     """Enable and start a systemd service; return True on success."""

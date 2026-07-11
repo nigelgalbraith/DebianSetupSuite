@@ -4,7 +4,6 @@ from pathlib import Path
 
 from modules.service_utils import (
     check_service_status,
-    create_service,
     enable_and_start_service,
     stop_and_disable_service,
     restart_service,
@@ -13,6 +12,7 @@ from modules.system_utils import (
     copy_script_template,
     copy_file,
     remove_file,
+    reload_systemd,
 )
 from modules.logger_utils import (
     install_logrotate_config,
@@ -34,7 +34,6 @@ KEY_SCRIPT_SRC   = "ScriptSrc"
 KEY_SCRIPT_DEST  = "ScriptDest"
 KEY_SERVICE_SRC  = "ServiceSrc"
 KEY_SERVICE_DEST = "ServiceDest"
-KEY_SERVICE_NAME = "ServiceName"
 KEY_LOG_NAME     = "LogName"
 KEY_LOGROTATE    = "LogrotateCfg"
 KEY_CONFIG_SRC   = "ConfigSrc"      
@@ -44,7 +43,6 @@ KEY_CONFIG_DEST  = "ConfigDest"
 # === VALIDATION CONFIG ===
 VALIDATION_CONFIG = {
     "required_job_fields": {
-        KEY_SERVICE_NAME: str,
         KEY_SCRIPT_SRC: str,
         KEY_SCRIPT_DEST: str,
         KEY_SERVICE_SRC: str,
@@ -147,7 +145,6 @@ DEPENDENCIES = ["logrotate"]
 
 # === TABLE COLUMNS ===
 PLAN_COLUMN_ORDER = [
-    KEY_SERVICE_NAME,
     KEY_ORDER,
     KEY_SCRIPT_SRC,
     KEY_SCRIPT_DEST,
@@ -175,16 +172,29 @@ PIPELINE_STATES = {
                 "args": [f"meta.{KEY_SCRIPT_SRC}", f"meta.{KEY_SCRIPT_DEST}"],
                 "result": "_",
             },
-            copy_file: {
-                "args": [f"meta.{KEY_CONFIG_SRC}", f"meta.{KEY_CONFIG_DEST}", True],
+            "copy_config_file": {
+                "fn": copy_file,
+                "args": [
+                    f"meta.{KEY_CONFIG_SRC}",
+                    f"meta.{KEY_CONFIG_DEST}",
+                    True,
+                ],
                 "result": "_",
             },
-            create_service: {
-                "args": [f"meta.{KEY_SERVICE_SRC}", f"meta.{KEY_SERVICE_DEST}"],
+            "copy_service_file": {
+                "fn": copy_file,
+                "args": [
+                    f"meta.{KEY_SERVICE_SRC}",
+                    f"meta.{KEY_SERVICE_DEST}",
+                ],
+                "result": "_",
+            },
+            reload_systemd: {
+                "args": [],
                 "result": "_",
             },
             enable_and_start_service: {
-                "args": [f"meta.{KEY_SERVICE_NAME}",],
+                "args": ["job"],
                 "result": "ok",
             },
         },
@@ -200,12 +210,16 @@ PIPELINE_STATES = {
                 "result": "_",
             },
             stop_and_disable_service: {
-                "args": [f"meta.{KEY_SERVICE_NAME}"],
+                "args": ["job"],
                 "result": "_",
             },
             "remove_service_file": {
                 "fn": remove_file,
                 "args": [f"meta.{KEY_SERVICE_DEST}"],
+                "result": "_",
+            },
+            reload_systemd: {
+                "args": [],
                 "result": "_",
             },
             "remove_script_file": {
@@ -226,7 +240,7 @@ PIPELINE_STATES = {
     "RESTART": {
         "pipeline": {
             restart_service: {
-                "args": [f"meta.{KEY_SERVICE_NAME}"],
+                "args": ["job"],
                 "result": "ok",
             },
         },

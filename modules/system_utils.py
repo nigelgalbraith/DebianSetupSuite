@@ -827,13 +827,17 @@ def convert_dict_list_to_str(
 def reload_systemd() -> bool:
     """Reload systemd to apply changes."""
     try:
-        subprocess.run(["systemctl", "daemon-reload"], check=True)
+        subprocess.run(
+            ["systemctl", "daemon-reload"],
+            check=True,
+        )
+        print("[OK]   Systemd daemon reloaded")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error reloading systemd: {e}")
+        print(f"[FAIL] Systemd daemon reload failed ({e})")
         return False
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"[FAIL] Unexpected systemd reload error ({e})")
         return False
 
 

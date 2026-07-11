@@ -27,7 +27,7 @@
   "EXAMPLE": {
     "<MODEL_ID>": {
       "ShutdownServices": {
-        "backup-on-shutdown": {
+        "backup-on-shutdown.service": {
           "Order": 10,
           "Name": "backup-on-shutdown",
           "ScriptSrc": "settings/services/backup-on-shutdown.sh",
@@ -38,7 +38,7 @@
           "ConfigSrc": "",
           "ConfigDest": ""
         },
-        "cleanup-temp-on-shutdown": {
+        "cleanup-temp-on-shutdown.service": {
           "Order": 20,
           "Name": "cleanup-temp-on-shutdown",
           "ScriptSrc": "settings/services/cleanup-temp.sh",

@@ -22,10 +22,10 @@ from modules.display_utils import display_config_doc
 
 # === CONFIG PATHS & KEYS ===
 PRIMARY_CONFIG   = "config/AppConfigSettings.json"
-JOBS_KEY         = "ShutdownServices"
-CONFIG_TYPE      = "ShutdownServices"
+JOBS_KEY         = "ScheduleServices"
+CONFIG_TYPE      = "ScheduleServices"
 DEFAULT_CONFIG   = "Default"
-CONFIG_DOC       = "doc/ShutdownServicesDoc.json"
+CONFIG_DOC       = "doc/ScheduleServicesDoc.json"
 
 # === JSON KEYS ===
 KEY_ORDER        = "Order"
@@ -37,7 +37,9 @@ KEY_SERVICE_DEST = "ServiceDest"
 KEY_LOG_NAME     = "LogName"
 KEY_LOGROTATE    = "LogrotateCfg"
 KEY_CONFIG_SRC   = "ConfigSrc"      
-KEY_CONFIG_DEST  = "ConfigDest"     
+KEY_CONFIG_DEST  = "ConfigDest"  
+KEY_TIMER_SRC    = "TimerSrc"
+KEY_TIMER_DEST   = "TimerDest"   
 
 
 # === VALIDATION CONFIG ===
@@ -47,6 +49,8 @@ VALIDATION_CONFIG = {
         KEY_SCRIPT_DEST: str,
         KEY_SERVICE_SRC: str,
         KEY_SERVICE_DEST: str,
+        KEY_TIMER_SRC: str,
+        KEY_TIMER_DEST: str,
         KEY_LOG_NAME: str,
     },
     "example_config": CONFIG_DOC,
@@ -67,7 +71,7 @@ DETECTION_CONFIG = {
 }
 
 # === LOGGING ===
-LOG_PREFIX      = "ShutDownServices"
+LOG_PREFIX      = "ScheduleServices"
 LOG_DIR         = Path.home() / "logs" / "services"
 LOGS_TO_KEEP    = 10
 ROTATE_LOG_NAME = f"{LOG_PREFIX}_*.log"
@@ -79,11 +83,13 @@ UNINSTALLED_LABEL = "DISABLED"
 
 # === STATUS CHECK CONFIG ===
 STATUS_FN_CONFIG = {
-    "fn": lambda job, meta: check_service_status(job),
-    "args": ["job", "meta"],
-    "labels": {True: INSTALLED_LABEL, False: UNINSTALLED_LABEL},
+    "fn": check_service_status,
+    "args": ["job"],
+    "labels": {
+        True: INSTALLED_LABEL,
+        False: UNINSTALLED_LABEL,
+    },
 }
-
 
 # === MENU / ACTIONS ===
 ACTIONS = {
@@ -104,11 +110,11 @@ ACTIONS = {
         "execute_state": "UNINSTALL",
         "post_state": "CONFIG_LOADING",
     },
-    "Restart services": {
+    "Restart timers": {
         "verb": "restart",
         "filter_status": True,   
         "label": "RESTARTED",
-        "prompt": "Restart selected services? [y/n]: ",
+        "prompt": "Restart selected timers? [y/n]: ",
         "execute_state": "RESTART",
         "post_state": "CONFIG_LOADING",
     },
@@ -134,7 +140,7 @@ ACTIONS = {
 }
 
 SUB_MENU = {
-    "title": "Select Service",
+    "title": "Select Timer",
     "all_label": "All",
     "cancel_label": "Cancel",
     "cancel_state": "MENU_SELECTION",
@@ -150,6 +156,8 @@ PLAN_COLUMN_ORDER = [
     KEY_SCRIPT_DEST,
     KEY_SERVICE_SRC,
     KEY_SERVICE_DEST,
+    KEY_TIMER_SRC,
+    KEY_TIMER_DEST,
     KEY_LOG_NAME,
     KEY_LOGROTATE,
     KEY_CONFIG_SRC,
@@ -189,6 +197,14 @@ PIPELINE_STATES = {
                 ],
                 "result": "_",
             },
+            "copy_timer_file": {
+                "fn": copy_file,
+                "args": [
+                    f"meta.{KEY_TIMER_SRC}",
+                    f"meta.{KEY_TIMER_DEST}",
+                ],
+                "result": "_",
+            },
             reload_systemd: {
                 "args": [],
                 "result": "_",
@@ -211,6 +227,11 @@ PIPELINE_STATES = {
             },
             stop_and_disable_service: {
                 "args": ["job"],
+                "result": "_",
+            },
+            "remove_timer_file": {
+                "fn": remove_file,
+                "args": [f"meta.{KEY_TIMER_DEST}"],
                 "result": "_",
             },
             "remove_service_file": {

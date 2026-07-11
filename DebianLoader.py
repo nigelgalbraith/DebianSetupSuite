@@ -79,6 +79,7 @@ AVAILABLE_CONSTANTS = {
     "IPCam utility": ("constants.IPCamConstants", 0),
     "Startup Services Presets utility": ("constants.StartupServicesConstants", 0),
     "Shutdown Services Presets utility": ("constants.ShutdownServicesConstants", 0),
+    "Schedule Services Presets utility": ("constants.ScheduleServicesConstants", 0),
     "Firewall Presets utility": ("constants.FirewallConstants", 0),
     "RDP Installer utility": ("constants.RDPConstants", 0),
     "Network Installer utility": ("constants.NetworkConstants", 0),

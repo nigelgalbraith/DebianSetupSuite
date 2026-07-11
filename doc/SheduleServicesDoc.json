@@ -1,0 +1,73 @@
+{
+  "FIXED_FIELDS": [
+    "<MODEL_ID>.ScheduleServices",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.Order",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.Name",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptSrc",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptDest",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceSrc",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceDest",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.LogName",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigSrc",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigDest"
+  ],
+  "EDITABLE_FIELDS": [
+    "<MODEL_ID>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.Order.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.Name.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptSrc.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptDest.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceSrc.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceDest.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.LogName.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigSrc.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigDest.<VALUES>"
+  ],
+  "EXAMPLE": {
+    "<MODEL_ID>": {
+      "ScheduleServices": {
+        "backup-on-shutdown.timer": {
+          "Order": 10,
+          "Name": "backup-on-shutdown",
+          "ScriptSrc": "settings/services/backup-on-shutdown.sh",
+          "ScriptDest": "/usr/local/bin/backup-on-shutdown.sh",
+          "ServiceSrc": "settings/services/backup-on-shutdown.service",
+          "ServiceDest": "/etc/systemd/system/backup-on-shutdown.service",
+          "TimerSrc": "settings/services/backup-on-shutdown.timer",
+          "TimerDest": "/etc/systemd/system/backup-on-shutdown.timer",
+          "LogName": "backup-on-shutdown",
+          "ConfigSrc": "",
+          "ConfigDest": ""
+        },
+        "cleanup-temp-on-shutdown.timer": {
+          "Order": 20,
+          "Name": "cleanup-temp-on-shutdown",
+          "ScriptSrc": "settings/services/cleanup-temp.sh",
+          "ScriptDest": "/usr/local/bin/cleanup-temp.sh",
+          "ServiceSrc": "settings/services/cleanup-temp.service",
+          "ServiceDest": "/etc/systemd/system/cleanup-temp.service",
+          "TimerSrc": "settings/services/cleanup-temp.timer",
+          "TimerDest": "/etc/systemd/system/cleanup-temp.timer",
+          "LogName": "cleanup-temp",
+          "ConfigSrc": "",
+          "ConfigDest": ""
+        }
+      }
+    }
+  },
+  "DESCRIPTION": {
+    "<MODEL_ID>.ScheduleServices.<VALUES>": "A scheduled service job executed at specified intervals.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.Order.<VALUES>": "Execution ordering number (lower runs first).",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.Name.<VALUES>": "Service name identifier.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptSrc.<VALUES>": "Source script path in your repo/project.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptDest.<VALUES>": "Destination path where the script will be installed.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceSrc.<VALUES>": "Source systemd unit file in your repo/project.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceDest.<VALUES>": "Destination systemd unit path.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.TimerSrc.<VALUES>": "Source systemd timer file in your repo/project.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.TimerDest.<VALUES>": "Destination systemd timer path.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.LogName": "Name of the logrotate config file.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigSrc.<VALUES>": "Optional config source path (blank if none).",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigDest.<VALUES>": "Optional config destination path (blank if none)."
+  }
+}

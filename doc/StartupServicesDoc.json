@@ -27,7 +27,7 @@
   "EXAMPLE": {
     "<MODEL_ID>": {
       "StartupServices": {
-        "my-startup-task": {
+        "my-startup-task.service": {
           "Order": 10,
           "Name": "my-startup-task",
           "ScriptSrc": "settings/services/my-startup-task.sh",
@@ -38,7 +38,7 @@
           "ConfigSrc": "settings/services/my-startup-task.conf",
           "ConfigDest": "/etc/my-startup-task.conf"
         },
-        "network-warmup": {
+        "network-warmup.service": {
           "Order": 20,
           "Name": "network-warmup",
           "ScriptSrc": "settings/services/network-warmup.sh",
