@@ -2,6 +2,7 @@
   "YOUR DESKTOP MODEL": {
     "Packages": "config/Desktop/DesktopPackages.json",
     "DEB": "config/Desktop/DesktopDEB.json",
+    "ScheduleServices": "config/Desktop/DesktopScheduleServices.json",
     "ThirdParty": "config/Desktop/DesktopThirdParty.json",
     "Firewall": "config/Desktop/DesktopFW.json",
     "Flatpak": "config/Desktop/DesktopFlatpak.json",
@@ -33,6 +34,7 @@
     "Arcade": "config/MediaCentre/MediaCentreArcade.json",
     "Launcher": "config/MediaCentre/MediaCentreLauncher.json",
     "Downloads": "config/MediaCentre/MediaCentreDownload.json"
+    
   },
   "YOUR LAPTOP MODEL": {
     "Packages": "config/Laptop/LaptopPackages.json",
@@ -53,7 +55,7 @@
   },
   "Default": {
     "Packages": "config/Default/DefaultPackages.json",
-    "DEB": "config/Default/DefaultDEB.json",
+    "DEB": "config/Default/DefaultDEB.json",        
     "ThirdParty": "config/Default/DefaultThirdParty.json",
     "Firewall": "config/Default/DefaultFW.json",
     "Flatpak": "config/Default/DefaultFlatpak.json",
