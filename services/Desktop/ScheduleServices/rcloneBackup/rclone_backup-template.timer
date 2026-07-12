@@ -1,0 +1,10 @@
+[Unit]
+Description=Run rclone backup on schedule
+
+[Timer]
+OnCalendar=*-*-* 12:59:00
+Persistent=true
+Unit=rclone_backup.service
+
+[Install]
+WantedBy=timers.target

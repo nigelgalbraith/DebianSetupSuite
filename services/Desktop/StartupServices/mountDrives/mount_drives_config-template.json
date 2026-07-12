@@ -1,0 +1,22 @@
+{
+  "MOUNT_OPTS": "defaults",
+  "DRIVES": {
+    "userData": "/mnt/nigel/userData",
+    "backups": "/mnt/nigel/backups"
+  },
+  "TRASH_USERS": ["rdp", "nigel"],
+  "PROTECTED_ROOT_FOLDERS": [
+    {
+      "path": "/mnt/nigel/userData",
+      "owner": "nigel",
+      "group": "nigel",
+      "permissions": "755"
+    },
+    {
+      "path": "/mnt/nigel/backups",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755"
+    }
+  ]
+}

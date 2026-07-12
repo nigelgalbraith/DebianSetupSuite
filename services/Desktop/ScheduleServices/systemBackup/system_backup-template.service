@@ -1,0 +1,15 @@
+[Unit]
+Description=Rsync Debian system backup
+RequiresMountsFor=/mnt/backups
+After=local-fs.target mount_drives.service
+ConditionPathExists=/usr/local/bin/system_backup.py
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -u /usr/local/bin/system_backup.py
+User=root
+Group=root
+Environment="PYTHONUNBUFFERED=1" "LANG=C.UTF-8" "LC_ALL=C.UTF-8"
+StandardOutput=append:/var/log/system_backup.log
+StandardError=append:/var/log/system_backup.log
+TimeoutStartSec=infinity

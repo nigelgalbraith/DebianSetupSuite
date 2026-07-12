@@ -1,0 +1,10 @@
+[Unit]
+Description=Run archive backup on schedule
+
+[Timer]
+OnCalendar=*-*-* 11:00:00
+Persistent=true
+Unit=archive_backup.service
+
+[Install]
+WantedBy=timers.target

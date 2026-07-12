@@ -1,0 +1,106 @@
+{
+  "PLEX_SERVICE": "plexmediaserver",
+  "GLOBAL_GROUP": "plex",
+  "GLOBAL_USERS": ["plexmedia", "rdp"],
+
+  "MEDIA_FOLDERS": [
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Movies",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Music",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Music Videos",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Other Videos",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Photos",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/TV Series",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    }
+  ],
+  "PROTECTED_ROOT_FOLDERS": [
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Movies",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Music",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Music Videos",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Other Videos",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Photos",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/TV Series",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/.removed/plex",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/.temp",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia/Backup",
+      "owner": "root",
+      "group": "backup",
+      "permissions": "2755"
+    },
+    {
+      "path": "/mnt/plexmedia/PlexMedia",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755"
+    }
+  ]
+}

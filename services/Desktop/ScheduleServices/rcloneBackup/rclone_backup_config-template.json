@@ -1,0 +1,14 @@
+{
+  "upload_jobs": {
+    "google_drive": {
+      "source_dir": "/mnt/nigel/userData/GoogleDrive",
+      "remote": "gdrive",
+      "remote_folder": "Debian",
+      "uploadFrequency": "Daily",
+      "exclude": [
+        "*.tmp",
+        "*.partial"
+      ]
+    }
+  }
+}

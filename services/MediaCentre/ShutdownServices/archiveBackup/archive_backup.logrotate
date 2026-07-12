@@ -1,0 +1,9 @@
+/var/log/archive_backup.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

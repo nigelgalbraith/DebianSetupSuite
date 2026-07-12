@@ -1,0 +1,21 @@
+[Unit]
+Description=Archive backup (poweroff only)
+DefaultDependencies=no
+RequiresMountsFor=/mnt/plexmedia/PlexMedia/Backup
+After=local-fs.target mount_drives.service
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecStop=/usr/bin/python3 -u /usr/local/bin/archive_backup.py
+User=root
+Group=root
+Environment="PYTHONUNBUFFERED=1" "LANG=C.UTF-8" "LC_ALL=C.UTF-8"
+StandardOutput=append:/var/log/archive_backup.log
+StandardError=append:/var/log/archive_backup.log
+TimeoutStopSec=30min
+
+[Install]
+WantedBy=multi-user.target

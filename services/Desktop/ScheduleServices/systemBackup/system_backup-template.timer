@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Debian system backup on schedule
+
+[Timer]
+OnCalendar=*-*-* 12:00:00
+Persistent=true
+Unit=system_backup.service
+
+[Install]
+WantedBy=timers.target

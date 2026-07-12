@@ -1,0 +1,90 @@
+RCLONE CONFIGURATION (Google Drive)
+
+This guide assumes rclone is already installed.
+
+1.  Run:
+
+    rclone config
+
+2.  Select:
+
+    n (New remote)
+
+3.  Remote name:
+
+    gdrive
+
+4.  Storage:
+
+    drive (Google Drive)
+
+5.  Answer the prompts:
+
+    client_id -> Press Enter client_secret -> Press Enter scope -> 1
+    (Full access) service_account_file -> Press Enter (LEAVE BLANK) Edit
+    advanced config -> n Shared Drive -> n Use auto config -> y
+
+6.  Your web browser will open.
+
+    • Sign into your Google account. • Click Allow. • Return to the
+    terminal.
+
+7.  Save the remote.
+
+8.  Verify it:
+
+    rclone listremotes
+
+Expected output:
+
+    gdrive:
+
+9.  Test the connection:
+
+    rclone lsd gdrive:
+
+You should see your Google Drive folders.
+
+  -----------
+  IMPORTANT
+  -----------
+
+If you accidentally enter:
+
+    service_account_file = n
+
+Edit:
+
+    ~/.config/rclone/rclone.conf
+
+and remove the line:
+
+    service_account_file = n
+
+Then reconnect:
+
+    rclone config reconnect gdrive:
+
+  ---------
+  TESTING
+  ---------
+
+List folders:
+
+    rclone lsd gdrive:
+
+Copy a folder (dry run):
+
+    rclone copy /path/to/folder gdrive:Destination --dry-run
+
+Copy for real:
+
+    rclone copy /path/to/folder gdrive:Destination
+
+The backup project uses:
+
+    rclone copy
+
+This uploads new and changed files only.
+
+Files deleted locally are NOT deleted from Google Drive.
