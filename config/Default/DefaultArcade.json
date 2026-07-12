@@ -58,7 +58,7 @@
         "arcadeGroups": ["arcade"],
         "ProtectedFolders": [
           {
-            "path": "/mnt/plexmedia/PlexMedia/arcade",
+            "path": "/mnt/plexmedia/mediaDrive/arcade",
             "owner": "root",
             "group": "arcade",
             "permissions": "3775"
@@ -149,7 +149,7 @@
         "arcadeGroups": ["arcade"],
         "ProtectedFolders": [
           {
-            "path": "/mnt/plexmedia/PlexMedia/arcade",
+            "path": "/mnt/plexmedia/mediaDrive/arcade",
             "owner": "root",
             "group": "arcade",
             "permissions": "3775"

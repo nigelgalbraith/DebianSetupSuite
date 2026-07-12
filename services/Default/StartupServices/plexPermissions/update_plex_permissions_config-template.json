@@ -97,7 +97,7 @@
       "permissions": "2755"
     },
     {
-      "path": "/mnt/user/PlexMedia",
+      "path": "/mnt/user/mediaDrive",
       "owner": "root",
       "group": "root",
       "permissions": "755"

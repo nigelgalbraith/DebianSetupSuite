@@ -6,10 +6,10 @@ After=network-online.target mount_drives.service
 Requires=mount_drives.service
 
 # Ensure the paths we operate on are mounted/available
-RequiresMountsFor=/mnt/user/PlexMedia
+RequiresMountsFor=/mnt/user/mediaDrive
 RequiresMountsFor=/mnt/storage/Movies
 RequiresMountsFor=/mnt/storage/TV\x20Series
-ConditionPathIsMountPoint=/mnt/user/PlexMedia
+ConditionPathIsMountPoint=/mnt/user/mediaDrive
 
 [Service]
 Type=oneshot

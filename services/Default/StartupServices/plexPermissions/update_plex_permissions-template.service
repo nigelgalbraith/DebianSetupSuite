@@ -5,7 +5,7 @@ After=network-online.target mount_drives.service plex_rename_folders.service
 Requires=mount_drives.service plex_rename_folders.service
 
 # Ensure all Plex directories are mounted before running
-RequiresMountsFor=/mnt/user/PlexMedia
+RequiresMountsFor=/mnt/user/mediaDrive
 RequiresMountsFor=/mnt/storage/Backup
 RequiresMountsFor=/mnt/storage/Movies
 RequiresMountsFor=/mnt/storage/Music
@@ -14,7 +14,7 @@ RequiresMountsFor=/mnt/storage/Photos
 RequiresMountsFor=/mnt/storage/TV\x20Series
 
 # Only run if the main mount point exists
-ConditionPathIsMountPoint=/mnt/user/PlexMedia
+ConditionPathIsMountPoint=/mnt/user/mediaDrive
 
 [Service]
 Type=oneshot

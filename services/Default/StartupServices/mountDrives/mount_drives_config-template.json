@@ -1,12 +1,12 @@
 {
   "MOUNT_OPTS": "defaults",
   "DRIVES": {
-    "PlexMedia": "/mnt/user/PlexMedia"
+    "mediaDrive": "/mnt/user/mediaDrive"
   },
   "TRASH_USERS": ["rdp", "user"],
   "PROTECTED_ROOT_FOLDERS": [
     {
-      "path": "/mnt/user/PlexMedia",
+      "path": "/mnt/user/mediaDrive",
       "owner": "root",
       "group": "root",
       "permissions": "755"
