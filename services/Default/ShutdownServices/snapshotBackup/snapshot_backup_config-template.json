@@ -1,0 +1,24 @@
+{
+  "backup_jobs": {
+    "plexMediaCentre": {
+      "source_dir": "/home/",
+      "backup_root": "/mnt/storage/Backup/",
+      "keep": 3,
+      "snapshot_prefix": "Media",
+      "backupFrequency": "Daily",
+      "backupGroup": "backup",
+      "backupUsers": ["user"],
+      "exclude": [
+        ".cache/",
+        "Downloads/",
+        ".local/share/Trash/",
+        "thinclient_drives/"
+      ],
+      "protected_folder": {
+        "owner": "root",
+        "group": "backup",
+        "permissions": "2775"
+      }
+    }
+  }
+}

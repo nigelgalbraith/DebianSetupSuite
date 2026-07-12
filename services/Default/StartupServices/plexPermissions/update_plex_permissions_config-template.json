@@ -1,0 +1,106 @@
+{
+  "PLEX_SERVICE": "plexmediaserver",
+  "GLOBAL_GROUP": "plex",
+  "GLOBAL_USERS": ["user", "rdp"],
+
+  "MEDIA_FOLDERS": [
+    {
+      "path": "/mnt/storage/Movies",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Music",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Music Videos",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Other Videos",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Photos",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/TV Series",
+      "owner": "plex",
+      "group": "plex",
+      "permissions": "3775"
+    }
+  ],
+  "PROTECTED_ROOT_FOLDERS": [
+    {
+      "path": "/mnt/storage/Movies",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Music",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Music Videos",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Other Videos",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Photos",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/TV Series",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/.removed/plex",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/.temp",
+      "owner": "root",
+      "group": "plex",
+      "permissions": "3775"
+    },
+    {
+      "path": "/mnt/storage/Backup",
+      "owner": "root",
+      "group": "backup",
+      "permissions": "2755"
+    },
+    {
+      "path": "/mnt/user/PlexMedia",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755"
+    }
+  ]
+}

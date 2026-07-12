@@ -1,0 +1,27 @@
+{
+  "backup_jobs": {
+    "portfolio": {
+      "source_dir": "/mnt/data",
+      "backup_root": "/home/user/Dropbox",
+      "keep": 1,
+      "archive_prefix": "portfolio",
+      "format": "tar.gz",
+      "exclude": [
+          ".git",
+          "__pycache__",
+          "*.pyc",
+          "*.tmp" 
+      ],
+      "stop_service": "",
+      "timeout_stop_sec": 30,
+      "backupFrequency": "Daily",
+      "backupGroup": "backup",
+      "backupUsers": ["user"],
+      "protected_folder": {
+        "owner": "user",
+        "group": "backup",
+        "permissions": "2775"
+      }
+    }
+  }
+}
