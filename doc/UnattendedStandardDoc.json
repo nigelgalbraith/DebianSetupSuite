@@ -1,0 +1,33 @@
+{
+"FIXED_FIELDS": [
+"<MODEL_ID>.UnattendedStandard",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>.Constants",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>.Action"
+],
+"EDITABLE_FIELDS": [
+"<MODEL_ID>",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>.Constants.<VALUES>",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>.Action.<VALUES>"
+],
+"EXAMPLE": {
+"<MODEL_ID>": {
+"UnattendedStandard": {
+"Packages": {
+"Constants": "constants.PackageConstants",
+"Action": "Install required Packages"
+},
+"DEB": {
+"Constants": "constants.DebConstants",
+"Action": "Install required DEB"
+}
+}
+}
+},
+"DESCRIPTION": {
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>": "A workflow that is executed under the Standard user account.",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>.Constants.<VALUES>": "Python module path for the constants file used by DebianLoader.",
+"<MODEL_ID>.UnattendedStandard.<WORKFLOW>.Action.<VALUES>": "The exact action name DebianLoader should execute for this workflow."
+}
+}

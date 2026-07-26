@@ -1,0 +1,29 @@
+{
+"FIXED_FIELDS": [
+"<MODEL_ID>.UnattendedRoot",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>.Constants",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>.Action"
+],
+"EDITABLE_FIELDS": [
+"<MODEL_ID>",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>.Constants.<VALUES>",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>.Action.<VALUES>"
+],
+"EXAMPLE": {
+"<MODEL_ID>": {
+"UnattendedRoot": {
+"Firewall": {
+"Constants": "constants.FirewallConstants",
+"Action": "Apply firewall rules"
+}
+}
+}
+},
+"DESCRIPTION": {
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>": "A workflow that is executed with root privileges.",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>.Constants.<VALUES>": "Python module path for the constants file used by DebianLoader.",
+"<MODEL_ID>.UnattendedRoot.<WORKFLOW>.Action.<VALUES>": "The exact action name DebianLoader should execute for this workflow."
+}
+}
