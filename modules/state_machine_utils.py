@@ -6,9 +6,11 @@ Small utilities used by the installer state machine: constants loading, CLI pars
 argument resolution, and step conditions.
 """
 
-from __future__ import annotations
 import argparse
 import importlib
+import subprocess
+import sys
+import os  
 from typing import Any, Dict, List, Optional
 
 # ---------------------------------------------------------------------
@@ -150,3 +152,28 @@ def check_when(cond: Any, job: str, meta: Dict[str, Any], ctx: Dict[str, Any]) -
     if callable(cond):
         return bool(cond(job, meta, ctx))
     return bool(resolve_arg(cond, job, meta, ctx))
+
+
+def execute_loader_job(meta: dict) -> bool:
+    constants = meta["Constants"]
+    action = meta["Action"]
+    command = [
+        sys.executable,
+        "DebianLoader.py",
+        "--constants",
+        constants,
+        "--action",
+        action,
+        "--yes",
+    ]
+    try:
+        subprocess.run(command, check=True)
+        return True
+    except (subprocess.CalledProcessError, OSError):
+        return False
+
+def unattended_available(loader: str) -> bool:
+    """
+    Return True if the unattended loader exists.
+    """
+    return os.path.isfile(loader)

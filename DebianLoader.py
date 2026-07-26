@@ -73,6 +73,7 @@ AVAILABLE_CONSTANTS = {
     "Backup utility": ("constants.BackupConstants", 1000),
     "Download utility": ("constants.DownloadConstants", 1000),
     "Function utility": ("constants.FunctionConstants", 1000),
+    "Unattended Standard utility": ("constants.UnattendedStandardConstants", 1000),
     "Arcade utility": ("constants.ArcadeConstants", 0),
     "DOSLoader utility": ("constants.DOSLoaderConstants", 0),
     "Launcher utility": ("constants.LauncherConstants", 0),
@@ -83,6 +84,7 @@ AVAILABLE_CONSTANTS = {
     "Firewall Presets utility": ("constants.FirewallConstants", 0),
     "RDP Installer utility": ("constants.RDPConstants", 0),
     "Network Installer utility": ("constants.NetworkConstants", 0),
+    "Unattended root utility": ("constants.UnattendedRootConstants", 0),
 }
 
 # === PIPELINE ===
@@ -743,12 +745,19 @@ class StateMachine:
         finally:
             self.active_jobs = {}
         self._pending_pipeline_spec = None
+        # A supplied --action is a one-shot non-interactive execution.
+        if self.cli_action:
+            self.state = State.FINALIZE
+            return
         try:
             self.state = State[post_state_name]
         except KeyError:
-            log_and_print(f"[WARN] Unknown post_state '{post_state_name}', defaulting to CONFIG_LOADING.")
+            log_and_print(
+                f"[WARN] Unknown post_state '{post_state_name}', "
+                "defaulting to CONFIG_LOADING."
+            )
             self.state = State.CONFIG_LOADING
-
+            
 
     # === MAIN ===
     def main(self) -> None:

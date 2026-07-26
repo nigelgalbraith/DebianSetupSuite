@@ -60,6 +60,7 @@ def run_tests(tests: list[dict]) -> bool:
     for test in tests:
         label = test.get("label", "unnamed-test")
         raw_path = test.get("path", "")
+        port = test.get("port")
         path = Path(os.path.expandvars(raw_path)).expanduser().resolve()
         print()
         print(f"{tag_test()} {label} → {path}")
@@ -68,13 +69,21 @@ def run_tests(tests: list[dict]) -> bool:
             all_ok = False
             continue
         if path.is_dir():
-            res = subprocess.run(["pytest", "."], cwd=path, check=False)
+            command = ["pytest", "."]
+            cwd = path
         else:
             if not ensure_executable(path):
-                print(f"{tag_fail()} Test '{label}' is not executable and could not be fixed.")
+                print(
+                    f"{tag_fail()} Test '{label}' is not executable "
+                    "and could not be fixed."
+                )
                 all_ok = False
                 continue
-            res = subprocess.run([str(path)], cwd=path.parent, check=False)
+            command = [str(path)]
+            cwd = path.parent
+            if port is not None:
+                command.extend(["--port", str(port)])
+        res = subprocess.run(command, cwd=cwd, check=False)
         if res.returncode != 0:
             print(f"{tag_fail()} {label}")
             all_ok = False
