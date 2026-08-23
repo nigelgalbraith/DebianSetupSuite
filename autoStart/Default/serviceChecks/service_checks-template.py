@@ -159,26 +159,33 @@ def show_html(html: str) -> None:
 # =====================
 def main() -> int:
     """Check configured systemd services and display their status."""
+    # Set paths for the configuration and HTML template.
     cfg_path = Path(CONFIG)
     html_path = Path(HTML)
     report_title = REPORT_TITLE
+    # Log the files being used.
     log_message(f"Using config: {cfg_path}")
     log_message(f"Using HTML: {html_path}")
+    # Load the configuration, HTML template, and configured checks.
     try:
         cfg = load_json(cfg_path)
         html_template = load_text(html_path)
         checks = parse_checks(cfg)
     except Exception as exc:
+        # Stop if any required file or configuration cannot be loaded.
         log_message(
             f"[ERROR] Failed to load required files: {exc!r}"
         )
         return 2
+    # Process each configured service check.
     results = []
     for check in checks:
         log_message(f"Checking service: {check.service}")
+        # Read the service exit status and last run time.
         exit_code, last_run = get_service_status(
             check.service
         )
+        # Record an unknown result if the service status cannot be read.
         if exit_code is None:
             results.append({
                 "description": check.description,
@@ -192,7 +199,9 @@ def main() -> int:
                 "Unable to read service exit status."
             )
             continue
+        # Match the service exit code to its configured status.
         status = check.status.get(str(exit_code))
+        # Record an unknown result if the exit code is not configured.
         if status is None:
             results.append({
                 "description": check.description,
@@ -206,6 +215,7 @@ def main() -> int:
                 f"Unknown exit status: {exit_code}"
             )
             continue
+        # Record the configured result for the service.
         results.append({
             "description": check.description,
             "result": status["result"],
@@ -219,13 +229,17 @@ def main() -> int:
             f"{status['description']} : "
             f"Last run: {last_run}"
         )
+    # Build the HTML table from the collected service results.
     checks_html = build_checks_html(results)
+    # Insert the results into the HTML report template.
     html = build_html_report(
         template=html_template,
         checks_html=checks_html,
         report_title=report_title,
     )
+    # Display the completed HTML report.
     show_html(html)
+    # Log the number of service checks processed.
     log_message(
         f"DONE: {len(results)}/{len(checks)} check(s) processed."
     )
