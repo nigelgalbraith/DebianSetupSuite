@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Service Checks
-Comment=Check service status at desktop login
-Exec=/usr/bin/python3 /usr/local/bin/service_checks.py
-Terminal=false
-X-GNOME-Autostart-enabled=true
