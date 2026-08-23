@@ -1,57 +1,49 @@
-# constants/StartUpServicesConstants.py
+# constants/AutoStartConstants.py
 
 from pathlib import Path
 
-from modules.service_utils import (
-    check_service_status,
-    enable_and_start_service,
-    stop_and_disable_service,
-    restart_service,
+from modules.autostart_utils import (
+    check_autostart_status,
+    install_autostart,
+    remove_autostart,
+    run_autostart,
 )
 from modules.system_utils import (
     copy_script_template,
-    copy_file,
     copy_files,
     copy_folders,
     remove_file,
     remove_files,
     remove_folders,
-    reload_systemd,
-)
-from modules.logger_utils import (
-    install_logrotate_config,
-    remove_logrotate_config,
 )
 from modules.display_utils import display_config_doc
 
 # === CONFIG PATHS & KEYS ===
 PRIMARY_CONFIG   = "config/AppConfigSettings.json"
-JOBS_KEY         = "StartupServices"
-CONFIG_TYPE      = "StartupServices"
+JOBS_KEY         = "AutoStart"
+CONFIG_TYPE      = "AutoStart"
 DEFAULT_CONFIG   = "Default"
-CONFIG_DOC       = "doc/StartupServicesDoc.json"
+CONFIG_DOC       = "doc/AutoStartDoc.json"
 
 # === JSON KEYS ===
 KEY_ORDER               = "Order"
-KEY_NAME                = "Name"           
+KEY_NAME                = "Name"
+KEY_USERS               = "Users"
 KEY_SCRIPT_SRC          = "ScriptSrc"
 KEY_SCRIPT_DEST         = "ScriptDest"
-KEY_SERVICE_SRC         = "ServiceSrc"
-KEY_SERVICE_DEST        = "ServiceDest"
-KEY_LOG_NAME            = "LogName"
-KEY_LOGROTATE           = "LogrotateCfg"
+KEY_AUTOSTART_SRC       = "AutoStartSrc"
+KEY_AUTOSTART_NAME      = "AutoStartName"
 KEY_OPTIONAL_FILES      = "OptionalFiles"
 KEY_OPTIONAL_FOLDERS    = "OptionalFolders"
-
 
 # === VALIDATION CONFIG ===
 VALIDATION_CONFIG = {
     "required_job_fields": {
+        KEY_USERS: list,
         KEY_SCRIPT_SRC: str,
         KEY_SCRIPT_DEST: str,
-        KEY_SERVICE_SRC: str,
-        KEY_SERVICE_DEST: str,
-        KEY_LOG_NAME: str,
+        KEY_AUTOSTART_SRC: str,
+        KEY_AUTOSTART_NAME: str,
     },
     "example_config": CONFIG_DOC,
 }
@@ -71,7 +63,7 @@ DETECTION_CONFIG = {
 }
 
 # === LOGGING ===
-LOG_PREFIX      = "StartUpServices"
+LOG_PREFIX      = "AutoStart"
 LOG_DIR         = Path.home() / "logs" / "services"
 LOGS_TO_KEEP    = 10
 ROTATE_LOG_NAME = f"{LOG_PREFIX}_*.log"
@@ -83,18 +75,17 @@ UNINSTALLED_LABEL = "DISABLED"
 
 # === STATUS CHECK CONFIG ===
 STATUS_FN_CONFIG = {
-    "fn": lambda job, meta: check_service_status(job),
-    "args": ["job", "meta"],
+    "fn": check_autostart_status,
+    "args": ["job", f"meta.{KEY_USERS}", f"meta.{KEY_AUTOSTART_NAME}"],
     "labels": {True: INSTALLED_LABEL, False: UNINSTALLED_LABEL},
 }
-
 
 # === MENU / ACTIONS ===
 ACTIONS = {
     "_meta": {"title": "Select an option"},
     f"Install & enable {JOBS_KEY}": {
         "verb": "installation",
-        "filter_status": False,  
+        "filter_status": False,
         "label": INSTALLED_LABEL,
         "prompt": "Proceed with installation? [y/n]: ",
         "execute_state": "INSTALL",
@@ -102,18 +93,18 @@ ACTIONS = {
     },
     f"Uninstall {JOBS_KEY}": {
         "verb": "uninstallation",
-        "filter_status": True,   
+        "filter_status": True,
         "label": UNINSTALLED_LABEL,
         "prompt": "Proceed with uninstallation? [y/n]: ",
         "execute_state": "UNINSTALL",
         "post_state": "CONFIG_LOADING",
     },
-    "Restart services": {
-        "verb": "restart",
-        "filter_status": True,   
-        "label": "RESTARTED",
-        "prompt": "Restart selected services? [y/n]: ",
-        "execute_state": "RESTART",
+    f"Run {JOBS_KEY}": {
+        "verb": "run",
+        "filter_status": True,
+        "label": "RUN",
+        "prompt": "Run selected AutoStart now? [y/n]: ",
+        "execute_state": "RUN",
         "post_state": "CONFIG_LOADING",
     },
     "Show config help": {
@@ -138,24 +129,23 @@ ACTIONS = {
 }
 
 SUB_MENU = {
-    "title": "Select Service",
+    "title": "Select AutoStart",
     "all_label": "All",
     "cancel_label": "Cancel",
     "cancel_state": "MENU_SELECTION",
 }
 
 # === DEPENDENCIES ===
-DEPENDENCIES = ["logrotate"]
+DEPENDENCIES = []
 
 # === TABLE COLUMNS ===
 PLAN_COLUMN_ORDER = [
     KEY_ORDER,
+    KEY_USERS,
     KEY_SCRIPT_SRC,
     KEY_SCRIPT_DEST,
-    KEY_SERVICE_SRC,
-    KEY_SERVICE_DEST,
-    KEY_LOGROTATE,
-    KEY_LOG_NAME,
+    KEY_AUTOSTART_SRC,
+    KEY_AUTOSTART_NAME,
     KEY_NAME,
 ]
 
@@ -165,11 +155,6 @@ OPTIONAL_PLAN_COLUMNS = {}
 PIPELINE_STATES = {
     "INSTALL": {
         "pipeline": {
-            install_logrotate_config: {
-                "args": [f"meta.{KEY_LOGROTATE}", f"meta.{KEY_LOG_NAME}"],
-                "when": f"meta.{KEY_LOGROTATE} and meta.{KEY_LOG_NAME}",
-                "result": "_",
-            },
             copy_script_template: {
                 "args": [f"meta.{KEY_SCRIPT_SRC}", f"meta.{KEY_SCRIPT_DEST}"],
                 "result": "_",
@@ -186,20 +171,12 @@ PIPELINE_STATES = {
                 "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
                 "result": "_",
             },
-            "copy_service_file": {
-                "fn": copy_file,
+            install_autostart: {
                 "args": [
-                    f"meta.{KEY_SERVICE_SRC}",
-                    f"meta.{KEY_SERVICE_DEST}",
+                    f"meta.{KEY_AUTOSTART_SRC}",
+                    f"meta.{KEY_AUTOSTART_NAME}",
+                    f"meta.{KEY_USERS}",
                 ],
-                "result": "_",
-            },
-            reload_systemd: {
-                "args": [],
-                "result": "_",
-            },
-            enable_and_start_service: {
-                "args": ["job"],
                 "result": "ok",
             },
         },
@@ -209,22 +186,11 @@ PIPELINE_STATES = {
     },
     "UNINSTALL": {
         "pipeline": {
-            remove_logrotate_config: {
-                "args": [f"meta.{KEY_LOG_NAME}"],
-                "when": f"meta.{KEY_LOG_NAME}",
-                "result": "_",
-            },
-            stop_and_disable_service: {
-                "args": ["job"],
-                "result": "_",
-            },
-            "remove_service_file": {
-                "fn": remove_file,
-                "args": [f"meta.{KEY_SERVICE_DEST}"],
-                "result": "_",
-            },
-            reload_systemd: {
-                "args": [],
+            remove_autostart: {
+                "args": [
+                    f"meta.{KEY_AUTOSTART_NAME}",
+                    f"meta.{KEY_USERS}",
+                ],
                 "result": "_",
             },
             "remove_script_file": {
@@ -249,14 +215,14 @@ PIPELINE_STATES = {
         "success_key": "ok",
         "post_state": "CONFIG_LOADING",
     },
-    "RESTART": {
+    "RUN": {
         "pipeline": {
-            restart_service: {
-                "args": ["job"],
+            run_autostart: {
+                "args": [f"meta.{KEY_SCRIPT_DEST}"],
                 "result": "ok",
             },
         },
-        "label": "RESTARTED",
+        "label": "RUN",
         "success_key": "ok",
         "post_state": "CONFIG_LOADING",
     },

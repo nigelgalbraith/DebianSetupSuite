@@ -459,6 +459,18 @@ def copy_file(src: str | Path | None, dest: str | Path | None, optional: bool = 
         return False
 
 
+def copy_files(files) -> bool:
+    """Copy a list of configured files."""
+    for file in files:
+        if not copy_file(
+            file.get("Src"),
+            file.get("Dest"),
+            True,
+        ):
+            return False
+    return True       
+
+
 def remove_file(path: str | Path | None, optional: bool = False) -> bool:
     """Delete a file or symlink. If optional=True, skip if it doesn't exist."""
     if not path:
@@ -481,7 +493,95 @@ def remove_file(path: str | Path | None, optional: bool = False) -> bool:
     except Exception as e:
         print(f"[FAIL] Remove failed → {path} ({e})")
         return False
-    
+
+
+def remove_files(files) -> bool:
+    """Remove a list of configured files."""
+    for file in files:
+        if not remove_file(
+            file.get("Dest"),
+            True,
+        ):
+            return False
+    return True
+
+
+def copy_folder(src: str | Path | None, dest: str | Path | None, optional: bool = False) -> bool:
+    """Copy a folder to `dest`. If optional=True, skip missing inputs instead of failing."""
+    if not src or not dest:
+        if optional:
+            print("[SKIP] No folder to copy (optional).")
+            return True
+        print("[FAIL] Source or destination missing.")
+        return False
+    try:
+        src_path = Path(src)
+        dest_path = Path(dest)
+        if not src_path.exists():
+            if optional:
+                print(f"[SKIP] Optional folder not present → {src_path}")
+                return True
+            print(f"[FAIL] Source folder missing → {src_path}")
+            return False
+        shutil.copytree(
+            src_path,
+            dest_path,
+            dirs_exist_ok=True,
+        )
+        print(f"[OK]   Folder copied → {dest_path}")
+        return True
+    except Exception as e:
+        print(f"[FAIL] Folder copy failed → {src} → {dest} ({e})")
+        return False
+
+
+def copy_folders(folders) -> bool:
+    """Copy a list of configured folders."""
+    for folder in folders:
+        if not copy_folder(
+            folder.get("Src"),
+            folder.get("Dest"),
+            True,
+        ):
+            return False
+    return True
+
+
+def remove_folder(path: str | Path | None, optional: bool = False) -> bool:
+    """Delete a folder. If optional=True, skip if it doesn't exist."""
+    if not path:
+        if optional:
+            print("[SKIP] No folder to remove (optional).")
+            return True
+        print("[FAIL] No path provided.")
+        return False
+    try:
+        p = Path(path)
+        if p.exists():
+            shutil.rmtree(p)
+            print(f"[OK]   Removed folder → {p}")
+            return True
+        if optional:
+            print(f"[SKIP] Folder not present (optional) → {p}")
+            return True
+        print(f"[FAIL] Folder not found → {p}")
+        return False
+    except Exception as e:
+        print(f"[FAIL] Folder remove failed → {path} ({e})")
+        return False
+
+
+def remove_folders(folders) -> bool:
+    """Remove a list of configured folders."""
+    for folder in folders:
+        if not remove_folder(
+            folder.get("Dest"),
+            True,
+        ):
+            return False
+    return True
+
+
 
 def copy_file_dict(mapping: Any) -> bool:
     """Copy multiple files or directories using rsync (expands ~ and $VARS)."""
@@ -838,6 +938,49 @@ def reload_systemd() -> bool:
         return False
     except Exception as e:
         print(f"[FAIL] Unexpected systemd reload error ({e})")
+        return False
+
+
+def reload_user_systemd() -> bool:
+    """Reload the user systemd daemon for the user who launched DebianLoader with sudo."""
+    user = os.environ.get("SUDO_USER")
+    if not user:
+        print("[FAIL] Unable to determine sudo user")
+        return False
+    try:
+        uid = subprocess.run(
+            ["id", "-u", user],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        result = subprocess.run(
+            [
+                "runuser",
+                "-u",
+                user,
+                "--",
+                "env",
+                f"XDG_RUNTIME_DIR=/run/user/{uid}",
+                f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus",
+                "systemctl",
+                "--user",
+                "daemon-reload",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            print(f"[OK]   User systemd daemon reloaded → {user}")
+            return True
+        print(
+            f"[FAIL] User systemd daemon reload failed → "
+            f"{user} ({result.stderr.strip()})"
+        )
+        return False
+    except Exception as e:
+        print(f"[FAIL] User systemd daemon reload failed → {user} ({e})")
         return False
 
 

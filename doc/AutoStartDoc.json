@@ -1,0 +1,68 @@
+{
+  "FIXED_FIELDS": [
+    "<MODEL_ID>.AutoStart",
+    "<MODEL_ID>.AutoStart.<VALUES>.Order",
+    "<MODEL_ID>.AutoStart.<VALUES>.Name",
+    "<MODEL_ID>.AutoStart.<VALUES>.Users",
+    "<MODEL_ID>.AutoStart.<VALUES>.ScriptSrc",
+    "<MODEL_ID>.AutoStart.<VALUES>.ScriptDest",
+    "<MODEL_ID>.AutoStart.<VALUES>.AutoStartSrc",
+    "<MODEL_ID>.AutoStart.<VALUES>.AutoStartName",
+    "<MODEL_ID>.AutoStart.<VALUES>.OptionalFiles",
+    "<MODEL_ID>.AutoStart.<VALUES>.OptionalFolders"
+  ],
+  "EDITABLE_FIELDS": [
+    "<MODEL_ID>",
+    "AutoStart.<VALUES>",
+    "AutoStart.<VALUES>.Order",
+    "AutoStart.<VALUES>.Name",
+    "AutoStart.<VALUES>.Users",
+    "AutoStart.<VALUES>.ScriptSrc",
+    "AutoStart.<VALUES>.ScriptDest",
+    "AutoStart.<VALUES>.AutoStartSrc",
+    "AutoStart.<VALUES>.AutoStartName",
+    "AutoStart.<VALUES>.OptionalFiles",
+    "AutoStart.<VALUES>.OptionalFolders"
+  ],
+  "EXAMPLE": {
+    "<MODEL_ID>": {
+      "AutoStart": {
+        "service_checks": {
+          "Order": 1,
+          "Name": "service_checks",
+          "Users": [
+            "nigel"
+          ],
+          "ScriptSrc": "autoStart/Desktop/serviceChecks/service_checks-template.py",
+          "ScriptDest": "/usr/local/bin/service_checks.py",
+          "AutoStartSrc": "autoStart/Desktop/serviceChecks/service_checks.desktop",
+          "AutoStartName": "service_checks.desktop",
+          "OptionalFiles": [
+            {
+              "Src": "autoStart/Desktop/serviceChecks/service_checks_config-template.json",
+              "Dest": "/etc/service_checks_config.json"
+            }
+          ],
+          "OptionalFolders": [
+            {
+              "Src": "autoStart/Desktop/serviceChecks/service_checks_html-template",
+              "Dest": "/usr/local/share/service_checks_html"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "DESCRIPTION": {
+    "<MODEL_ID>.AutoStart.<VALUES>": "Add an AutoStart job as the key. Each job installs a desktop autostart entry for the configured users.",
+    "<MODEL_ID>.AutoStart.<VALUES>.Order": "Controls the order in which AutoStart jobs are displayed and processed.",
+    "<MODEL_ID>.AutoStart.<VALUES>.Name": "Human-readable name for the AutoStart job.",
+    "<MODEL_ID>.AutoStart.<VALUES>.Users": "List of users who should receive the autostart entry in their ~/.config/autostart directory.",
+    "<MODEL_ID>.AutoStart.<VALUES>.ScriptSrc": "Source path of the script template to install.",
+    "<MODEL_ID>.AutoStart.<VALUES>.ScriptDest": "Destination path where the installed script will be copied.",
+    "<MODEL_ID>.AutoStart.<VALUES>.AutoStartSrc": "Source path of the .desktop autostart file.",
+    "<MODEL_ID>.AutoStart.<VALUES>.AutoStartName": "Filename used when installing the .desktop entry into each user's ~/.config/autostart directory.",
+    "<MODEL_ID>.AutoStart.<VALUES>.OptionalFiles": "Optional files to copy during installation. Each entry contains Src and Dest.",
+    "<MODEL_ID>.AutoStart.<VALUES>.OptionalFolders": "Optional folders to copy during installation. Each entry contains Src and Dest."
+  }
+}

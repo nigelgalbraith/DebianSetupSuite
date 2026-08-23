@@ -8,8 +8,8 @@
     "<MODEL_ID>.StartupServices.<VALUES>.ServiceSrc",
     "<MODEL_ID>.StartupServices.<VALUES>.ServiceDest",
     "<MODEL_ID>.StartupServices.<VALUES>.LogName",
-    "<MODEL_ID>.StartupServices.<VALUES>.ConfigSrc",
-    "<MODEL_ID>.StartupServices.<VALUES>.ConfigDest"
+    "<MODEL_ID>.StartupServices.<VALUES>.OptionalFiles",
+    "<MODEL_ID>.StartupServices.<VALUES>.OptionalFolders"
   ],
   "EDITABLE_FIELDS": [
     "<MODEL_ID>",
@@ -21,8 +21,8 @@
     "<MODEL_ID>.StartupServices.<VALUES>.ServiceSrc.<VALUES>",
     "<MODEL_ID>.StartupServices.<VALUES>.ServiceDest.<VALUES>",
     "<MODEL_ID>.StartupServices.<VALUES>.LogName.<VALUES>",
-    "<MODEL_ID>.StartupServices.<VALUES>.ConfigSrc.<VALUES>",
-    "<MODEL_ID>.StartupServices.<VALUES>.ConfigDest.<VALUES>"
+    "<MODEL_ID>.StartupServices.<VALUES>.OptionalFiles.<VALUES>",
+    "<MODEL_ID>.StartupServices.<VALUES>.OptionalFolders.<VALUES>"
   ],
   "EXAMPLE": {
     "<MODEL_ID>": {
@@ -35,8 +35,13 @@
           "ServiceSrc": "settings/services/my-startup-task.service",
           "ServiceDest": "/etc/systemd/system/my-startup-task.service",
           "LogName": "my-startup-task",
-          "ConfigSrc": "settings/services/my-startup-task.conf",
-          "ConfigDest": "/etc/my-startup-task.conf"
+          "OptionalFiles": [
+            {
+              "Src": "settings/services/my-startup-task.conf",
+              "Dest": "/etc/my-startup-task.conf"
+            }
+          ],
+          "OptionalFolders": []
         },
         "network-warmup.service": {
           "Order": 20,
@@ -46,8 +51,8 @@
           "ServiceSrc": "settings/services/network-warmup.service",
           "ServiceDest": "/etc/systemd/system/network-warmup.service",
           "LogName": "network-warmup",
-          "ConfigSrc": "",
-          "ConfigDest": ""
+          "OptionalFiles": [],
+          "OptionalFolders": []
         }
       }
     }
@@ -60,8 +65,8 @@
     "<MODEL_ID>.StartupServices.<VALUES>.ScriptDest.<VALUES>": "Destination path on the system where the script will be installed.",
     "<MODEL_ID>.StartupServices.<VALUES>.ServiceSrc.<VALUES>": "Source systemd unit file in your repo/project.",
     "<MODEL_ID>.StartupServices.<VALUES>.ServiceDest.<VALUES>": "Destination systemd unit path (commonly /etc/systemd/system/<name>.service).",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.LogName": "Name of the logrotate config file.",
-    "<MODEL_ID>.StartupServices.<VALUES>.ConfigSrc.<VALUES>": "Optional source config file shipped with the project (blank if none).",
-    "<MODEL_ID>.StartupServices.<VALUES>.ConfigDest.<VALUES>": "Optional destination path for the config file (blank if none)."
+    "<MODEL_ID>.StartupServices.<VALUES>.LogName": "Name of the logrotate config file.",
+    "<MODEL_ID>.StartupServices.<VALUES>.OptionalFiles.<VALUES>": "Optional files to copy. Each entry contains Src and Dest.",
+    "<MODEL_ID>.StartupServices.<VALUES>.OptionalFolders.<VALUES>": "Optional folders to copy. Each entry contains Src and Dest."
   }
 }

@@ -11,7 +11,11 @@ from modules.service_utils import (
 from modules.system_utils import (  
     copy_script_template,
     copy_file,
+    copy_files,
+    copy_folders,
     remove_file,
+    remove_files,
+    remove_folders,
     reload_systemd,
 )
 from modules.logger_utils import (
@@ -28,18 +32,18 @@ DEFAULT_CONFIG   = "Default"
 CONFIG_DOC       = "doc/ScheduleServicesDoc.json"
 
 # === JSON KEYS ===
-KEY_ORDER        = "Order"
-KEY_NAME         = "Name"           
-KEY_SCRIPT_SRC   = "ScriptSrc"
-KEY_SCRIPT_DEST  = "ScriptDest"
-KEY_SERVICE_SRC  = "ServiceSrc"
-KEY_SERVICE_DEST = "ServiceDest"
-KEY_LOG_NAME     = "LogName"
-KEY_LOGROTATE    = "LogrotateCfg"
-KEY_CONFIG_SRC   = "ConfigSrc"      
-KEY_CONFIG_DEST  = "ConfigDest"  
-KEY_TIMER_SRC    = "TimerSrc"
-KEY_TIMER_DEST   = "TimerDest"   
+KEY_ORDER               = "Order"
+KEY_NAME                = "Name"           
+KEY_SCRIPT_SRC          = "ScriptSrc"
+KEY_SCRIPT_DEST         = "ScriptDest"
+KEY_SERVICE_SRC         = "ServiceSrc"
+KEY_SERVICE_DEST        = "ServiceDest"
+KEY_LOG_NAME            = "LogName"
+KEY_LOGROTATE           = "LogrotateCfg"
+KEY_OPTIONAL_FILES      = "OptionalFiles"
+KEY_OPTIONAL_FOLDERS    = "OptionalFolders"
+KEY_TIMER_SRC           = "TimerSrc"
+KEY_TIMER_DEST          = "TimerDest"
 
 
 # === VALIDATION CONFIG ===
@@ -160,8 +164,6 @@ PLAN_COLUMN_ORDER = [
     KEY_TIMER_DEST,
     KEY_LOG_NAME,
     KEY_LOGROTATE,
-    KEY_CONFIG_SRC,
-    KEY_CONFIG_DEST,
     KEY_NAME,
 ]
 
@@ -180,13 +182,16 @@ PIPELINE_STATES = {
                 "args": [f"meta.{KEY_SCRIPT_SRC}", f"meta.{KEY_SCRIPT_DEST}"],
                 "result": "_",
             },
-            "copy_config_file": {
-                "fn": copy_file,
-                "args": [
-                    f"meta.{KEY_CONFIG_SRC}",
-                    f"meta.{KEY_CONFIG_DEST}",
-                    True,
-                ],
+            "copy_files": {
+                "fn": copy_files,
+                "args": [f"meta.{KEY_OPTIONAL_FILES}"],
+                "when": f"meta.{KEY_OPTIONAL_FILES}",
+                "result": "_",
+            },
+            "copy_folders": {
+                "fn": copy_folders,
+                "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
+                "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
                 "result": "_",
             },
             "copy_service_file": {
@@ -248,10 +253,17 @@ PIPELINE_STATES = {
                 "args": [f"meta.{KEY_SCRIPT_DEST}"],
                 "result": "_",
             },
-            "remove_config_file": {
-                "fn": remove_file,
-                "args": [f"meta.{KEY_CONFIG_DEST}", True],
-                "result": "ok",
+            "remove_files": {
+                "fn": remove_files,
+                "args": [f"meta.{KEY_OPTIONAL_FILES}"],
+                "when": f"meta.{KEY_OPTIONAL_FILES}",
+                "result": "_",
+            },
+            "remove_folders": {
+                "fn": remove_folders,
+                "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
+                "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
+                "result": "_",
             },
         },
         "label": UNINSTALLED_LABEL,

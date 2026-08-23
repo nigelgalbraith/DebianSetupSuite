@@ -7,9 +7,11 @@
     "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptDest",
     "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceSrc",
     "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceDest",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.TimerSrc",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.TimerDest",
     "<MODEL_ID>.ScheduleServices.<VALUES>.LogName",
-    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigSrc",
-    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigDest"
+    "<MODEL_ID>.ScheduleServices.<VALUES>.OptionalFiles",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.OptionalFolders"
   ],
   "EDITABLE_FIELDS": [
     "<MODEL_ID>",
@@ -20,9 +22,11 @@
     "<MODEL_ID>.ScheduleServices.<VALUES>.ScriptDest.<VALUES>",
     "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceSrc.<VALUES>",
     "<MODEL_ID>.ScheduleServices.<VALUES>.ServiceDest.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.TimerSrc.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.TimerDest.<VALUES>",
     "<MODEL_ID>.ScheduleServices.<VALUES>.LogName.<VALUES>",
-    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigSrc.<VALUES>",
-    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigDest.<VALUES>"
+    "<MODEL_ID>.ScheduleServices.<VALUES>.OptionalFiles.<VALUES>",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.OptionalFolders.<VALUES>"
   ],
   "EXAMPLE": {
     "<MODEL_ID>": {
@@ -37,8 +41,13 @@
           "TimerSrc": "settings/services/backup-on-shutdown.timer",
           "TimerDest": "/etc/systemd/system/backup-on-shutdown.timer",
           "LogName": "backup-on-shutdown",
-          "ConfigSrc": "",
-          "ConfigDest": ""
+          "OptionalFiles": [
+            {
+              "Src": "settings/services/backup-on-shutdown_config-template.json",
+              "Dest": "/etc/backup-on-shutdown_config.json"
+            }
+          ],
+          "OptionalFolders": []
         },
         "cleanup-temp-on-shutdown.timer": {
           "Order": 20,
@@ -50,8 +59,8 @@
           "TimerSrc": "settings/services/cleanup-temp.timer",
           "TimerDest": "/etc/systemd/system/cleanup-temp.timer",
           "LogName": "cleanup-temp",
-          "ConfigSrc": "",
-          "ConfigDest": ""
+          "OptionalFiles": [],
+          "OptionalFolders": []
         }
       }
     }
@@ -67,7 +76,7 @@
     "<MODEL_ID>.ScheduleServices.<VALUES>.TimerSrc.<VALUES>": "Source systemd timer file in your repo/project.",
     "<MODEL_ID>.ScheduleServices.<VALUES>.TimerDest.<VALUES>": "Destination systemd timer path.",
     "<MODEL_ID>.ScheduleServices.<VALUES>.LogName": "Name of the logrotate config file.",
-    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigSrc.<VALUES>": "Optional config source path (blank if none).",
-    "<MODEL_ID>.ScheduleServices.<VALUES>.ConfigDest.<VALUES>": "Optional config destination path (blank if none)."
+    "<MODEL_ID>.ScheduleServices.<VALUES>.OptionalFiles.<VALUES>": "Optional files to copy. Each entry contains Src and Dest.",
+    "<MODEL_ID>.ScheduleServices.<VALUES>.OptionalFolders.<VALUES>": "Optional folders to copy. Each entry contains Src and Dest."
   }
 }

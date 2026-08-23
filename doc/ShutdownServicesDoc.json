@@ -8,8 +8,8 @@
     "<MODEL_ID>.ShutdownServices.<VALUES>.ServiceSrc",
     "<MODEL_ID>.ShutdownServices.<VALUES>.ServiceDest",
     "<MODEL_ID>.ShutdownServices.<VALUES>.LogName",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.ConfigSrc",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.ConfigDest"
+    "<MODEL_ID>.ShutdownServices.<VALUES>.OptionalFiles",
+    "<MODEL_ID>.ShutdownServices.<VALUES>.OptionalFolders"
   ],
   "EDITABLE_FIELDS": [
     "<MODEL_ID>",
@@ -21,8 +21,8 @@
     "<MODEL_ID>.ShutdownServices.<VALUES>.ServiceSrc.<VALUES>",
     "<MODEL_ID>.ShutdownServices.<VALUES>.ServiceDest.<VALUES>",
     "<MODEL_ID>.ShutdownServices.<VALUES>.LogName.<VALUES>",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.ConfigSrc.<VALUES>",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.ConfigDest.<VALUES>"
+    "<MODEL_ID>.ShutdownServices.<VALUES>.OptionalFiles.<VALUES>",
+    "<MODEL_ID>.ShutdownServices.<VALUES>.OptionalFolders.<VALUES>"
   ],
   "EXAMPLE": {
     "<MODEL_ID>": {
@@ -35,8 +35,13 @@
           "ServiceSrc": "settings/services/backup-on-shutdown.service",
           "ServiceDest": "/etc/systemd/system/backup-on-shutdown.service",
           "LogName": "backup-on-shutdown",
-          "ConfigSrc": "",
-          "ConfigDest": ""
+          "OptionalFiles": [
+            {
+              "Src": "settings/services/backup-on-shutdown_config-template.json",
+              "Dest": "/etc/backup-on-shutdown_config.json"
+            }
+          ],
+          "OptionalFolders": []
         },
         "cleanup-temp-on-shutdown.service": {
           "Order": 20,
@@ -46,8 +51,8 @@
           "ServiceSrc": "settings/services/cleanup-temp.service",
           "ServiceDest": "/etc/systemd/system/cleanup-temp.service",
           "LogName": "cleanup-temp",
-          "ConfigSrc": "",
-          "ConfigDest": ""
+          "OptionalFiles": [],
+          "OptionalFolders": []
         }
       }
     }
@@ -61,7 +66,7 @@
     "<MODEL_ID>.ShutdownServices.<VALUES>.ServiceSrc.<VALUES>": "Source systemd unit file in your repo/project.",
     "<MODEL_ID>.ShutdownServices.<VALUES>.ServiceDest.<VALUES>": "Destination systemd unit path.",
     "<MODEL_ID>.ShutdownServices.<VALUES>.LogName": "Name of the logrotate config file.",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.ConfigSrc.<VALUES>": "Optional config source path (blank if none).",
-    "<MODEL_ID>.ShutdownServices.<VALUES>.ConfigDest.<VALUES>": "Optional config destination path (blank if none)."
+    "<MODEL_ID>.ShutdownServices.<VALUES>.OptionalFiles.<VALUES>": "Optional files to copy. Each entry contains Src and Dest.",
+    "<MODEL_ID>.ShutdownServices.<VALUES>.OptionalFolders.<VALUES>": "Optional folders to copy. Each entry contains Src and Dest."
   }
 }

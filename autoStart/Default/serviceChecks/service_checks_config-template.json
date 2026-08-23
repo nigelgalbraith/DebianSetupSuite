@@ -1,0 +1,41 @@
+{
+  "checks": {
+    "example_service": {
+      "service": "example.service",
+      "description": "Example Service",
+      "status": {
+        "0": {
+          "result": "PASS",
+          "class": "pass",
+          "description": "Service completed successfully."
+        },
+        "1": {
+          "result": "FAIL",
+          "class": "fail",
+          "description": "Service failed."
+        },
+        "2": {
+          "result": "FAIL",
+          "class": "fail",
+          "description": "Service configuration or setup failed."
+        }
+      }
+    },
+    "another_service": {
+      "service": "another.service",
+      "description": "Another Service",
+      "status": {
+        "0": {
+          "result": "PASS",
+          "class": "pass",
+          "description": "Service completed successfully."
+        },
+        "1": {
+          "result": "FAIL",
+          "class": "fail",
+          "description": "Service failed."
+        }
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ Systemd helper functions for installing unit files, enabling/disabling services,
 
 from pathlib import Path
 import subprocess
+import os
 
 # ---------------------------------------------------------------------
 # HELPERS / STATUS
@@ -94,6 +95,94 @@ def restart_service(service_name: str) -> bool:
             print(f"[DETAILS] {e.stdout.strip()}")
         return False
 
+
+def _run_user_systemctl(*args):
+    """Run systemctl --user as the user who launched DebianLoader with sudo."""
+    user = os.environ.get("SUDO_USER")
+    if not user:
+        print("[FAIL] Unable to determine sudo user")
+        return None
+    uid = subprocess.run(
+        ["id", "-u", user],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    return subprocess.run(
+        [
+            "runuser",
+            "-u",
+            user,
+            "--",
+            "env",
+            f"XDG_RUNTIME_DIR=/run/user/{uid}",
+            f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus",
+            "systemctl",
+            "--user",
+            *args,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def check_user_service_status(service_name: str) -> bool:
+    """Return True if the user systemd service is enabled."""
+    result = _run_user_systemctl(
+        "is-enabled",
+        service_name,
+    )
+
+    return bool(
+        result
+        and result.returncode == 0
+    )
+
+
+def enable_and_start_user_service(service_name: str) -> bool:
+    """Enable and start a user systemd service."""
+    result = _run_user_systemctl(
+        "enable",
+        "--now",
+        service_name,
+    )
+    if result and result.returncode == 0:
+        print(f"[OK]   User service enabled & started → {service_name}")
+        return True
+    error = result.stderr.strip() if result else "Unknown error"
+    print(f"[FAIL] Enable/start failed → {service_name} ({error})")
+    return False
+
+
+def stop_and_disable_user_service(service_name: str) -> bool:
+    """Stop and disable a user systemd service."""
+    result = _run_user_systemctl(
+        "disable",
+        "--now",
+        service_name,
+    )
+    if result and result.returncode == 0:
+        print(f"[OK]   User service stopped & disabled → {service_name}")
+        return True
+    error = result.stderr.strip() if result else "Unknown error"
+    print(f"[FAIL] Stop/disable failed → {service_name} ({error})")
+    return False
+
+
+def restart_user_service(service_name: str) -> bool:
+    """Restart a user systemd service."""
+    result = _run_user_systemctl(
+        "restart",
+        service_name,
+    )
+    if result and result.returncode == 0:
+        print(f"[OK]   User service restarted → {service_name}")
+        return True
+    error = result.stderr.strip() if result else "Unknown error"
+    print(f"[FAIL] Restart failed → {service_name} ({error})")
+    return False
+    
 
 def start_service_standard(service: str) -> bool:
     """
