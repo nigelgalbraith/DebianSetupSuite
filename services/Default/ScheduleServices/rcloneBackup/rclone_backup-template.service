@@ -8,6 +8,7 @@ Wants=network-online.target
 Type=oneshot
 User=user
 Group=user
+StateDirectory=rclone_backup
 Environment="HOME=/home/user"
 Environment="PYTHONUNBUFFERED=1"
 Environment="LANG=C.UTF-8"
