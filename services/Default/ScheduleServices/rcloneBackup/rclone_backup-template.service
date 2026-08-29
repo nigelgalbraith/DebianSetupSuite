@@ -1,7 +1,8 @@
 [Unit]
 Description=Rclone backup
-RequiresMountsFor=/mnt/data
-After=local-fs.target network-online.target
+Requires=mount_drives.service
+RequiresMountsFor=/mnt/nigel/userData/GoogleDrive
+After=mount_drives.service local-fs.target network-online.target
 Wants=network-online.target
 
 [Service]
