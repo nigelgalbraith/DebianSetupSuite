@@ -42,37 +42,6 @@ def open_browser(browser: str, url: str) -> bool:
         print(f"[ERROR] Failed to open browser: {e}")
         return False
 
-
-def close_browser(browser: str) -> bool:
-    """Close the browser process launched by this utility."""
-    process = _BROWSER_PROCESSES.get(browser)
-    if process is None:
-        print(f"[INFO] No tracked {browser} process to close.")
-        return True
-    if process.poll() is not None:
-        _BROWSER_PROCESSES.pop(browser, None)
-        print(f"[INFO] Tracked {browser} process is already closed.")
-        return True
-    try:
-        process.terminate()
-        process.wait(timeout=10)
-        _BROWSER_PROCESSES.pop(browser, None)
-        print(f"[OK] Closed {browser}.")
-        return True
-    except subprocess.TimeoutExpired:
-        try:
-            process.kill()
-            process.wait(timeout=5)
-            _BROWSER_PROCESSES.pop(browser, None)
-            print(f"[OK] Killed {browser}.")
-            return True
-        except Exception as e:
-            print(f"[ERROR] Failed to kill {browser}: {e}")
-            return False
-    except Exception as e:
-        print(f"[ERROR] Failed to close {browser}: {e}")
-        return False
-
 # ---------------------------------------------------------------------
 # USER INTERACTION
 # ---------------------------------------------------------------------

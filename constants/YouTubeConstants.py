@@ -1,6 +1,6 @@
 # constants/YouTubeConstants.py
 from pathlib import Path
-from modules.browser_utils import open_browser, close_browser, wait_for_user
+from modules.browser_utils import open_browser, wait_for_user
 from modules.display_utils import display_config_doc
 from modules.ytdlp_utils import run_yt_dlp
 from modules.system_utils import check_folder_path
@@ -190,19 +190,13 @@ PIPELINE_STATES = {
                 "args": [
                     (
                         "\n"
-                        "YouTube has been opened in Chromium.\n\n"
+                        "YouTube has been opened in Firefox.\n\n"
                         "If this is your first run, log into YouTube now.\n"
                         "If you are already logged in, no action is required.\n\n"
                         "Press ENTER when ready to continue: "
                     ),
                 ],
                 "result": "user_ready",
-            },
-            close_browser: {
-                "args": [
-                    BROWSER,
-                ],
-                "result": "browser_closed",
             },
             run_yt_dlp: {
                 "args": [
