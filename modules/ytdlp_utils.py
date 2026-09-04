@@ -96,6 +96,10 @@ def run_yt_dlp(
             f"[ERROR] yt-dlp failed with exit code "
             f"{result.returncode}."
         )
+        print(
+            "[HINT] If authentication is required, "
+            f"log into YouTube in {browser} and try again."
+        )
         return False
     print(f"[OK] Download complete: {download_dir}")
     return True
