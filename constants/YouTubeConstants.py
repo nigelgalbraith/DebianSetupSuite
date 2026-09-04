@@ -18,7 +18,7 @@ KEY_DOWNLOAD_PATH = "download_path"
 KEY_FORMAT        = "format"
 
 # === BROWSER ===
-BROWSER = "chromium"
+BROWSER = "firefox"
 
 
 # === VALIDATION CONFIG ===
@@ -70,7 +70,7 @@ STATUS_FN_CONFIG = {
 }
 
 # === DEPENDENCIES ===
-DEPENDENCIES = ["chromium","ffmpeg"]
+DEPENDENCIES = ["firefox-esr", "ffmpeg"]
 
 # === ACTIONS ===
 ACTIONS = {
@@ -81,7 +81,7 @@ ACTIONS = {
         "verb": "open youtube playlist",
         "filter_status": None,
         "label": None,
-        "prompt": "Open YouTube playlist in Chromium? [y/n]: ",
+        "prompt": "Open YouTube playlist in Firefox? [y/n]: ",
         "execute_state": "OPEN_PLAYLIST",
         "post_state": "CONFIG_LOADING",
         "skip_sub_select": False,
