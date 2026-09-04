@@ -1,0 +1,32 @@
+{
+  "FIXED_FIELDS": [
+    "<MODEL_ID>.YouTube",
+    "<MODEL_ID>.YouTube.<VALUES>.playlist_url",
+    "<MODEL_ID>.YouTube.<VALUES>.download_path",
+    "<MODEL_ID>.YouTube.<VALUES>.format"
+  ],
+  "EDITABLE_FIELDS": [
+    "<MODEL_ID>",
+    "<MODEL_ID>.YouTube.<VALUES>",
+    "<MODEL_ID>.YouTube.<VALUES>.playlist_url.<VALUES>",
+    "<MODEL_ID>.YouTube.<VALUES>.download_path.<VALUES>",
+    "<MODEL_ID>.YouTube.<VALUES>.format.<VALUES>"
+  ],
+  "EXAMPLE": {
+    "<MODEL_ID>": {
+      "YouTube": {
+        "Music": {
+          "playlist_url": "https://www.youtube.com/playlist?list=EXAMPLE_PLAYLIST_ID",
+          "download_path": "/home/user/Music/YouTube",
+          "format": "mp3"
+        }
+      }
+    }
+  },
+  "DESCRIPTION": {
+    "<MODEL_ID>.YouTube.<VALUES>": "A YouTube playlist download job.",
+    "<MODEL_ID>.YouTube.<VALUES>.playlist_url.<VALUES>": "YouTube playlist URL to download.",
+    "<MODEL_ID>.YouTube.<VALUES>.download_path.<VALUES>": "Directory where downloaded files are saved.",
+    "<MODEL_ID>.YouTube.<VALUES>.format.<VALUES>": "Output format. Supported audio formats: mp3, aac, flac, m4a, opus, vorbis, wav, alac. Supported video formats: mp4, mkv, webm."
+  }
+}

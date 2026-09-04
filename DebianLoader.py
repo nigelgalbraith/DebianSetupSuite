@@ -72,6 +72,7 @@ AVAILABLE_CONSTANTS = {
     "Docker Manager utility": ("constants.DockerConstants", 1000),
     "Backup utility": ("constants.BackupConstants", 1000),
     "Download utility": ("constants.DownloadConstants", 1000),
+    "YouTube utility": ("constants.YouTubeConstants", 1000),
     "Function utility": ("constants.FunctionConstants", 1000),
     "Unattended Standard utility": ("constants.UnattendedStandardConstants", 1000),
     "Arcade utility": ("constants.ArcadeConstants", 0),
