@@ -41,17 +41,3 @@ def open_browser(browser: str, url: str) -> bool:
     except Exception as e:
         print(f"[ERROR] Failed to open browser: {e}")
         return False
-
-# ---------------------------------------------------------------------
-# USER INTERACTION
-# ---------------------------------------------------------------------
-
-
-def wait_for_user(message: str) -> bool:
-    """Wait for user confirmation before continuing."""
-    try:
-        input(message)
-        return True
-    except (EOFError, KeyboardInterrupt):
-        print("\n[INFO] Continue cancelled.")
-        return False
