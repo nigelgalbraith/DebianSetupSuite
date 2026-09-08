@@ -95,11 +95,27 @@ def get_service_status(
         exit_code = int(values["ExecMainStatus"])
     except (KeyError, ValueError):
         exit_code = None
-    last_run = (
-        values.get("ExecMainExitTimestamp")
-        or "Unknown"
-    )
-    return exit_code, last_run
+    last_run = values.get("ExecMainExitTimestamp")
+    if not last_run:
+        timer = service.replace(".service", ".timer")
+        timer_result = subprocess.run(
+            [
+                "systemctl",
+                "show",
+                timer,
+                "--property=LastTriggerUSec",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if timer_result.returncode == 0:
+            for line in timer_result.stdout.splitlines():
+                key, _, value = line.partition("=")
+                if key == "LastTriggerUSec" and value:
+                    last_run = value
+                    break
+    return exit_code, last_run or "Unknown"
 
 # =====================
 # HTML
