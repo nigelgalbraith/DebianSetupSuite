@@ -1,0 +1,11 @@
+{
+  "Default": {
+    "YouTube": {
+      "Music": {
+        "playlist_url": "https://www.youtube.com/playlist?list=EXAMPLE_PLAYLIST_ID",
+        "download_path": "/home/user/Music/YouTube",
+        "format": "mp3"
+      }
+    }
+  }
+}

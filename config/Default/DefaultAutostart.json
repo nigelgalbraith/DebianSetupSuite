@@ -1,0 +1,29 @@
+{
+  "Default": {
+    "AutoStart": {
+      "service_checks": {
+        "Order": 1,
+        "Name": "service_checks",
+        "Users": [
+          "user"
+        ],
+        "ScriptSrc": "autoStart/Default/serviceChecks/service_checks-template.py",
+        "ScriptDest": "/usr/local/bin/service_checks.py",
+        "AutoStartSrc": "autoStart/Default/serviceChecks/service_checks.desktop",
+        "AutoStartName": "service_checks.desktop",
+        "OptionalFiles": [
+          {
+            "Src": "autoStart/Default/serviceChecks/service_checks_config-template.json",
+            "Dest": "/etc/service_checks_config.json"
+          }
+        ],
+        "OptionalFolders": [
+          {
+            "Src": "autoStart/Default/serviceChecks/service_checks_html-template",
+            "Dest": "/usr/local/share/service_checks_html"
+          }
+        ]
+      }
+    }
+  }
+}

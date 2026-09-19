@@ -1,0 +1,23 @@
+{
+  "Default": {
+    "ShutdownServices": {
+      "archive_backup.service": {
+        "Order": 1,
+        "Name": "archive_backup",
+        "ScriptSrc": "services/Default/ShutdownServices/archiveBackup/archive_backup-template.py",
+        "ScriptDest": "/usr/local/bin/archive_backup.py",
+        "ServiceSrc": "services/Default/ShutdownServices/archiveBackup/archive_backup-template.service",
+        "ServiceDest": "/etc/systemd/system/archive_backup.service",
+        "LogName": "archive_backup",
+        "LogrotateCfg": "services/Default/ShutdownServices/archiveBackup/archive_backup.logrotate",
+        "OptionalFiles": [
+          {
+            "Src": "services/Default/ShutdownServices/archiveBackup/archive_backup_config-template.json",
+            "Dest": "/etc/archive_backup_config.json"
+          }
+        ],
+        "OptionalFolders": []
+      }
+    }
+  }
+}

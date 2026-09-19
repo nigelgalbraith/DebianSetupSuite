@@ -1,6 +1,6 @@
 {
   "Default": {
-    "ufw":{
+    "Firewall":{
       "Firewall": {
         "Applications": [
           "ExampleApp1",

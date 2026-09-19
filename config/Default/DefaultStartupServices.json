@@ -1,0 +1,23 @@
+{
+  "Default": {
+    "StartupServices": {
+      "mount_drives.service": {
+        "Order": 1,
+        "Name": "mount_drives",
+        "ScriptSrc": "services/Default/StartupServices/mountDrives/mount_drives-template.py",
+        "ScriptDest": "/usr/local/bin/mount_drives.py",
+        "ServiceSrc": "services/Default/StartupServices/mountDrives/mount_drives-template.service",
+        "ServiceDest": "/etc/systemd/system/mount_drives.service",
+        "LogName": "mount_drives",
+        "LogrotateCfg": "services/Default/StartupServices/mountDrives/mount_drives.logrotate",
+        "OptionalFiles": [
+          {
+            "Src": "services/Default/StartupServices/mountDrives/mount_drives_config-template.json",
+            "Dest": "/etc/mount_drives_config.json"
+          }
+        ],
+        "OptionalFolders": []
+      }
+    }
+  }
+}

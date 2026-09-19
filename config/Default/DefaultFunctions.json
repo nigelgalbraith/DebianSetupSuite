@@ -2,89 +2,119 @@
   "Default": {
     "Functions": {
       "apt_repo_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "archive_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "camera_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "display_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "docker_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "download_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "firewall_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "flatpak_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "function_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "json_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "logger_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "network_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "package_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "rdp_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "service_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "state_machine_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       },
       "system_utils.py": {
-        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/modules",
-        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/constants"],
-        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader.py"]
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
+      },
+      "autostart_utils.py": {
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
+      },
+      "binary_utils.py": {
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
+      },
+      "browser_utils.py": {
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
+      },
+      "desktop_utils.py": {
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
+      },
+      "test_utils.py": {
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
+      },
+      "ytdlp_utils.py": {
+        "ModuleFolder": "$HOME/Documents/GitHub/DebianScripts/DebianLoader/modules",
+        "CheckFolders": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/constants"],
+        "CheckFiles": ["$HOME/Documents/GitHub/DebianScripts/DebianLoader/DebianLoader.py"]
       }
     }
   }

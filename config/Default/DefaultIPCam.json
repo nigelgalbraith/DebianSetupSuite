@@ -1,6 +1,6 @@
 {
   "Default": {
-    "IPTV": {
+    "IPCam": {
       "Example1": {
         "Service": "xTeVe",
         "ServiceURL": "http://127.0.0.1:34400",

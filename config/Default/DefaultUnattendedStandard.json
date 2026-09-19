@@ -1,0 +1,30 @@
+{
+  "Default": {
+    "UnattendedStandard": {
+      "Packages": {
+        "Constants": "constants.PackageConstants",
+        "Action": "Install required Packages"
+      },
+      "DEB": {
+        "Constants": "constants.DebConstants",
+        "Action": "Install required DEB"
+      },
+      "Flatpak": {
+        "Constants": "constants.FlatpakConstants",
+        "Action": "Install required Flatpak"
+      },
+      "ThirdParty": {
+        "Constants": "constants.ThirdPartyConstants",
+        "Action": "Install required ThirdParty"
+      },
+      "Archive": {
+        "Constants": "constants.ArchiveConstants",
+        "Action": "Install required Archive"
+      },
+      "Binary": {
+        "Constants": "constants.BinaryConstants",
+        "Action": "Install required Binary"
+      }
+    }
+  }
+}

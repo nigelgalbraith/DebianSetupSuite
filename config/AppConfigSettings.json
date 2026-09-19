@@ -70,6 +70,13 @@
     "Launcher": "config/Default/DefaultLauncher.json",
     "Backup": "config/Default/DefaultBackup.json",
     "Downloads": "config/Default/DefaultDownload.json",
-    "Functions": "config/Default/DefaultFunctions.json"
+    "Functions": "config/Default/DefaultFunctions.json",
+    "AutoStart": "config/Default/DefaultAutostart.json",
+    "StartupServices": "config/Default/DefaultStartupServices.json",
+    "ShutdownServices": "config/Default/DefaultShutdownServices.json",
+    "ScheduleServices": "config/Default/DefaultScheduleServices.json",
+    "YouTube": "config/Default/DefaultYouTube.json",
+    "UnattendedStandard": "config/Default/DefaultUnattendedStandard.json",
+    "UnattendedRoot": "config/Default/DefaultUnattendedRoot.json"
   }
 }

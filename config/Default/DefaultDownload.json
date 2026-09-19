@@ -1,12 +1,17 @@
 {
   "Default": {
     "Downloads": {
-      "TEST": {
+      "Archives": {
         "links": {
-          "output_path": "",
-          "extract": false,
-          "extract_extensions": [],
-          "LinksConfigs": []
+          "output_path": "/home/user/Downloads/Archives",
+          "extract": true,
+          "extract_extensions": [
+            ".zip",
+            ".tar.gz"
+          ],
+          "LinksConfigs": [
+            "settings/downloads/links/ExampleLinks.json"
+          ]
         }
       }
     }

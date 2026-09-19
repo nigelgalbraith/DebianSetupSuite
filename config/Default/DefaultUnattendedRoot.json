@@ -1,0 +1,30 @@
+{
+  "Default": {
+    "UnattendedRoot": {
+      "Firewall": {
+        "Constants": "constants.FirewallConstants",
+        "Action": "Apply firewall rules"
+      },
+      "DOSLoader": {
+        "Constants": "constants.DOSLoaderConstants",
+        "Action": "Install DOSLoader game"
+      },
+      "IPCam": {
+        "Constants": "constants.IPCamConstants",
+        "Action": "Install & enable IPCam"
+      },
+      "StartupServices": {
+        "Constants": "constants.StartupServicesConstants",
+        "Action": "Install & enable StartupServices"
+      },
+      "ScheduleServices": {
+        "Constants": "constants.ScheduleServicesConstants",
+        "Action": "Install & enable ScheduleServices"
+      },
+      "RDP": {
+        "Constants": "constants.RDPConstants",
+        "Action": "Install required RDP"
+      }
+    }
+  }
+}
