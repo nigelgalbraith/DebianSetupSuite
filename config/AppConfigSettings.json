@@ -49,7 +49,6 @@
     "RDP": "config/Laptop/LaptopRDP.json",
     "DOSLoader": "config/Laptop/LaptopMSDOS.json",
     "IPCam": "config/Laptop/LaptopIPCam.json",
-    "Backup": "config/Laptop/LaptopBackup.json",
     "Downloads": "config/Laptop/LaptopDownload.json",
     "Functions": "config/Laptop/LaptopFunctions.json"
   },
