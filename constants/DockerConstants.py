@@ -171,7 +171,7 @@ SUB_MENU = {
 }
 
 # === DEPENDENCIES ===
-DEPENDENCIES = ["docker"]
+DEPENDENCIES = []
 
 # === TABLE COLUMNS ===
 PLAN_COLUMN_ORDER = [
