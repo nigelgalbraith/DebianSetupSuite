@@ -139,7 +139,15 @@ SUB_MENU = {
 }
 
 # === DEPENDENCIES ===
-DEPENDENCIES = ["xfce4", "xfce4-goodies", "ssl-cert"]
+DEPENDENCIES = [
+    "xfce4",
+    "xfce4-goodies",
+    "ssl-cert",
+    "lxqt-core",
+    "openbox",
+    "dbus-x11",
+    "xorgxrdp",
+]
 
 # === PLAN TABLE COLUMNS
 PLAN_COLUMN_ORDER = [
