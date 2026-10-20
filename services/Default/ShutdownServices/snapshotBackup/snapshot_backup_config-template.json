@@ -1,13 +1,15 @@
 {
   "backup_jobs": {
-    "plexMediaCentre": {
-      "source_dir": "/home/",
-      "backup_root": "/mnt/storage/Backup/",
+    "JOB_NAME": {
+      "source_dir": "/path/to/source",
+      "backup_root": "/path/to/backup/destination",
       "keep": 3,
-      "snapshot_prefix": "Media",
+      "snapshot_prefix": "SNAPSHOT_NAME",
       "backupFrequency": "Daily",
       "backupGroup": "backup",
-      "backupUsers": ["user"],
+      "backupUsers": [
+        "USERNAME"
+      ],
       "exclude": [
         ".cache/",
         "Downloads/",

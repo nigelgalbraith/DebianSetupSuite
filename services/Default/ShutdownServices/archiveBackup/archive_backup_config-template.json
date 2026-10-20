@@ -1,16 +1,19 @@
+
 {
   "backup_jobs": {
-    "plex": {
-      "source_dir": "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server",
-      "backup_root": "/mnt/storage/Backup",
+    "SERVICE_JOB_NAME": {
+      "source_dir": "/path/to/application/data",
+      "backup_root": "/path/to/backup/destination",
       "keep": 3,
       "archive_prefix": "config",
       "format": "tar.gz",
-      "stop_service": "plexmediaserver",
+      "stop_service": "SERVICE_NAME",
       "timeout_stop_sec": 30,
       "backupFrequency": "Daily",
       "backupGroup": "backup",
-      "backupUsers": ["user"],
+      "backupUsers": [
+        "USERNAME"
+      ],
       "protected_folder": {
         "owner": "root",
         "group": "backup",
@@ -18,27 +21,9 @@
       }
     },
 
-    "mame": {
-      "source_dir": "/etc/mame",
-      "backup_root": "/mnt/storage/Backup",
-      "keep": 3,
-      "archive_prefix": "config",
-      "format": "zip",
-      "stop_service": "",
-      "timeout_stop_sec": 0,
-      "backupFrequency": "Daily",
-      "backupGroup": "backup",
-      "backupUsers": ["user"],
-      "protected_folder": {
-        "owner": "root",
-        "group": "backup",
-        "permissions": "2775"
-      }
-    },
-
-    "kodi": {
-      "source_dir": "/home/user/.kodi",
-      "backup_root": "/mnt/storage/Backup",
+    "APPLICATION_JOB_NAME": {
+      "source_dir": "/path/to/application/config",
+      "backup_root": "/path/to/backup/destination",
       "keep": 3,
       "archive_prefix": "config",
       "format": "tar.gz",
@@ -46,43 +31,9 @@
       "timeout_stop_sec": 0,
       "backupFrequency": "Daily",
       "backupGroup": "backup",
-      "backupUsers": ["user"],
-      "protected_folder": {
-        "owner": "root",
-        "group": "backup",
-        "permissions": "2775"
-      }
-    },
-
-    "retroarch_config": {
-      "source_dir": "/etc/retroarch",
-      "backup_root": "/mnt/storage/Backup",
-      "keep": 3,
-      "archive_prefix": "config",
-      "format": "tar.gz",
-      "stop_service": "",
-      "timeout_stop_sec": 0,
-      "backupFrequency": "Daily",
-      "backupGroup": "backup",
-      "backupUsers": ["user"],
-      "protected_folder": {
-        "owner": "root",
-        "group": "backup",
-        "permissions": "2775"
-      }
-    },
-
-    "retroarch_data": {
-      "source_dir": "/var/lib/arcade/retroarch",
-      "backup_root": "/mnt/storage/Backup",
-      "keep": 3,
-      "archive_prefix": "data",
-      "format": "tar.gz",
-      "stop_service": "",
-      "timeout_stop_sec": 0,
-      "backupFrequency": "Daily",
-      "backupGroup": "backup",
-      "backupUsers": ["user"],
+      "backupUsers": [
+        "USERNAME"
+      ],
       "protected_folder": {
         "owner": "root",
         "group": "backup",

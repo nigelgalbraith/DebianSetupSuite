@@ -1,9 +1,9 @@
 {
   "upload_jobs": {
-    "google_drive": {
-      "source_dir": "/mnt/data",
-      "remote": "gdrive",
-      "remote_folder": "Debian",
+    "JOB_NAME": {
+      "source_dir": "/path/to/source",
+      "remote": "REMOTE_NAME",
+      "remote_folder": "REMOTE_FOLDER",
       "uploadFrequency": "Daily",
       "exclude": [
         "*.tmp",

@@ -1,8 +1,9 @@
+
 {
   "backup_jobs": {
-    "debian_system": {
+    "SYSTEM_JOB_NAME": {
       "source_dir": "/",
-      "destination_dir": "/mnt/backups/System",
+      "destination_dir": "/path/to/system/backup",
       "mirror": true,
       "one_file_system": true,
       "exclude": [
@@ -20,17 +21,19 @@
         "/home/*/.local/share/Trash/***"
       ],
       "backupGroup": "backup",
-      "backupUsers": ["user"],
+      "backupUsers": [
+        "USERNAME"
+      ],
       "protected_folder": {
-          "owner": "root",
-          "group": "backup",
-          "permissions": "2775"
+        "owner": "root",
+        "group": "backup",
+        "permissions": "2775"
       }
     },
 
-    "user_data": {
-      "source_dir": "/mnt/data/userData",
-      "destination_dir": "/mnt/backups/userData",
+    "DATA_JOB_NAME": {
+      "source_dir": "/path/to/source/data",
+      "destination_dir": "/path/to/data/backup",
       "mirror": true,
       "one_file_system": true,
       "exclude": [
@@ -39,11 +42,13 @@
         "/.Trash/***"
       ],
       "backupGroup": "backup",
-      "backupUsers": ["user"],
+      "backupUsers": [
+        "USERNAME"
+      ],
       "protected_folder": {
-          "owner": "root",
-          "group": "backup",
-          "permissions": "2775"
+        "owner": "root",
+        "group": "backup",
+        "permissions": "2775"
       }
     }
   }

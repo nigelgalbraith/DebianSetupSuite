@@ -1,12 +1,15 @@
 {
   "MOUNT_OPTS": "defaults",
   "DRIVES": {
-    "mediaDrive": "/mnt/user/mediaDrive"
+    "DRIVE_NAME": "/mnt/USERNAME/DRIVE_NAME"
   },
-  "TRASH_USERS": ["rdp", "user"],
+  "TRASH_USERS": [
+    "USERNAME_1",
+    "USERNAME_2"
+  ],
   "PROTECTED_ROOT_FOLDERS": [
     {
-      "path": "/mnt/user/mediaDrive",
+      "path": "/mnt/USERNAME/DRIVE_NAME",
       "owner": "root",
       "group": "root",
       "permissions": "755"
