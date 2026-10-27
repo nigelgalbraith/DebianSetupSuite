@@ -247,13 +247,16 @@ def add_user_to_group(users, groups) -> bool:
         users = [users]
     if isinstance(groups, str):
         groups = [groups]
-
     ok = True
+    group_str = ",".join(groups)
+    prefix = [] if os.geteuid() == 0 else ["sudo"]
     for user in users:
         try:
-            group_str = ",".join(groups)
             print(f"[add_user_to_group] Adding user '{user}' to group(s): {group_str}...")
-            res = subprocess.run(["usermod", "-aG", group_str, user], check=False)
+            res = subprocess.run(
+                [*prefix, "usermod", "-aG", group_str, user],
+                check=False,
+            )
             if res.returncode == 0:
                 print(f"[add_user_to_group] User '{user}' added to group(s): {group_str}.")
             else:

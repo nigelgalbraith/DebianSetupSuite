@@ -1,5 +1,6 @@
 # constants/DockerConstants.py
 
+import os
 from pathlib import Path
 
 from modules.docker_utils import (
@@ -16,7 +17,7 @@ from modules.docker_utils import (
     remove_container,
 )
 from modules.archive_utils import download_archive_file, install_archive_file, handle_cleanup
-from modules.system_utils import expand_path
+from modules.system_utils import expand_path, add_user_to_group
 from modules.display_utils import display_config_doc
 from modules.test_utils import run_tests
 
@@ -141,6 +142,16 @@ ACTIONS = {
         "prompt": "This will REMOVE the container(s). Proceed? [y/n]: ",
         "execute_state": "REMOVE",
         "post_state": "CONFIG_LOADING",
+    },
+    "Add Current User to Docker Group": {
+        "verb": "add_docker_group",
+        "filter_status": None,
+        "label": "GROUP UPDATED",
+        "prompt": "Docker group membership grants root-level privileges. Proceed? [y/n]: ",
+        "execute_state": "ADD_DOCKER_GROUP",
+        "post_state": "CONFIG_LOADING",
+        "skip_sub_select": True,
+        "skip_prepare_plan": True,
     },
     "Show config help": {
         "verb": "help",
@@ -367,6 +378,20 @@ PIPELINE_STATES = {
             },
         },
         "label": UNINSTALLED_LABEL,
+        "success_key": "ok",
+        "post_state": "CONFIG_LOADING",
+    },
+    "ADD_DOCKER_GROUP": {
+        "pipeline": {
+            add_user_to_group: {
+                "args": [
+                    lambda job, meta, ctx: os.environ.get("SUDO_USER") or os.environ.get("USER"),
+                    "docker",
+                ],
+                "result": "ok",
+            },
+        },
+        "label": "GROUP UPDATED",
         "success_key": "ok",
         "post_state": "CONFIG_LOADING",
     },
