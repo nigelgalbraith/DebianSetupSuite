@@ -20,6 +20,10 @@ from shutil import which
 from pathlib import Path
 from typing import List, Sequence, Dict, Any, Union, Any, Tuple, Optional
 
+# ----------------------------------------------------------------------------
+# CONSTANTS
+# ----------------------------------------------------------------------------
+
 DEFAULT_EXCLUDES = [
     ".git/",
     ".github/",
@@ -35,7 +39,6 @@ class Colors:
     DIM = "\033[2m"
     RESET = "\033[0m"
 
-  
 # ----------------------------------------------------------------------------
 # SMALL HELPERS / STATUS
 # ----------------------------------------------------------------------------
@@ -249,12 +252,11 @@ def add_user_to_group(users, groups) -> bool:
         groups = [groups]
     ok = True
     group_str = ",".join(groups)
-    prefix = [] if os.geteuid() == 0 else ["sudo"]
     for user in users:
         try:
             print(f"[add_user_to_group] Adding user '{user}' to group(s): {group_str}...")
             res = subprocess.run(
-                [*prefix, "usermod", "-aG", group_str, user],
+                ["usermod", "-aG", group_str, user],
                 check=False,
             )
             if res.returncode == 0:
@@ -266,6 +268,29 @@ def add_user_to_group(users, groups) -> bool:
             print(f"[add_user_to_group] Exception for '{user}': {e}")
             ok = False
     return ok
+
+
+def add_current_user_to_group(group: str) -> bool:
+    """Add the current user to a system group."""
+    user = os.environ.get("SUDO_USER") or os.environ.get("USER")
+    if not user:
+        print("[add_current_user_to_group] Could not determine current user.")
+        return False
+    prefix = [] if os.geteuid() == 0 else ["sudo"]
+    try:
+        print(f"[add_current_user_to_group] Adding user '{user}' to group '{group}'...")
+        res = subprocess.run(
+            [*prefix, "usermod", "-aG", group, user],
+            check=False,
+        )
+        if res.returncode == 0:
+            print(f"[add_current_user_to_group] User '{user}' added to group '{group}'.")
+            return True
+        print(f"[add_current_user_to_group] Failed to add user '{user}' to group '{group}'.")
+        return False
+    except Exception as e:
+        print(f"[add_current_user_to_group] Exception: {e}")
+        return False
 
 
 def add_users_to_group(users: list[str], group: str) -> bool:

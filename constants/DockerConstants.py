@@ -17,7 +17,7 @@ from modules.docker_utils import (
     remove_container,
 )
 from modules.archive_utils import download_archive_file, install_archive_file, handle_cleanup
-from modules.system_utils import expand_path, add_user_to_group
+from modules.system_utils import expand_path, add_current_user_to_group
 from modules.display_utils import display_config_doc
 from modules.test_utils import run_tests
 
@@ -383,11 +383,8 @@ PIPELINE_STATES = {
     },
     "ADD_DOCKER_GROUP": {
         "pipeline": {
-            add_user_to_group: {
-                "args": [
-                    lambda job, meta, ctx: os.environ.get("SUDO_USER") or os.environ.get("USER"),
-                    "docker",
-                ],
+            add_current_user_to_group: {
+                "args": ["docker"],
                 "result": "ok",
             },
         },

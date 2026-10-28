@@ -11,7 +11,7 @@ import importlib
 import subprocess
 import sys
 import os  
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Callable
 
 # ---------------------------------------------------------------------
 # SMALL HELPERS
@@ -60,6 +60,51 @@ def load_constants_from_module(module_path: str, required: list[str]):
         )
     return type("Constants", (), consts)()
 
+# ---------------------------------------------------------------------
+# PIPELINE
+# ---------------------------------------------------------------------
+
+def run_pipeline(active_jobs: Dict[str, Dict[str, Any]],
+                 pipeline: Dict[Any, Dict[str, Any]],
+                 *, label: str, success_key: str,
+                 log: Callable[[str], None]) -> None:
+    """Run a pipeline over active_jobs; supports both function-key and 'fn' styles."""
+    jobs = active_jobs or {"__setup__": {}}
+    success = 0
+    total = len(jobs)
+    for job, meta in jobs.items():
+        ctx: Dict[str, Any] = {}
+        for key, step in pipeline.items():
+            # --- Resolve function ---
+            fn = key if callable(key) else step.get("fn")
+            if not callable(fn):
+                raise ValueError(f"Invalid pipeline step: {key}")
+            fn_name = fn.__name__
+            # --- Check condition ---
+            if not check_when(step.get("when"), job, meta, ctx):
+                continue
+            try:
+                args = [resolve_arg(a, job, meta, ctx) for a in step.get("args", [])]
+                result = fn(*args)
+                rkey = step.get("result")
+                if rkey is not None:
+                    ctx[rkey] = result if result is not None else True
+            except Exception as e:
+                ctx.setdefault("errors", []).append({
+                    "step": fn_name,
+                    "error": str(e)
+                })
+                log(f"[ERROR] {job}: {fn_name} failed → {e!r}")
+
+        if bool(ctx.get(success_key)):
+            success += 1
+        log("")
+    log(f"{label}: {success}/{total} succeeded")
+
+
+# ---------------------------------------------------------------------
+# ARGS
+# ---------------------------------------------------------------------
 
 def parse_args_early() -> argparse.Namespace:
     """
