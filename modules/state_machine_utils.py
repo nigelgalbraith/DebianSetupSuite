@@ -82,6 +82,7 @@ def run_pipeline(active_jobs: Dict[str, Dict[str, Any]],
             fn_name = fn.__name__
             # --- Check condition ---
             if not check_when(step.get("when"), job, meta, ctx):
+                log(f"[SKIPPED] {job}: {fn_name}")
                 continue
             try:
                 args = [resolve_arg(a, job, meta, ctx) for a in step.get("args", [])]
@@ -95,7 +96,6 @@ def run_pipeline(active_jobs: Dict[str, Dict[str, Any]],
                     "error": str(e)
                 })
                 log(f"[ERROR] {job}: {fn_name} failed → {e!r}")
-
         if bool(ctx.get(success_key)):
             success += 1
         log("")
@@ -179,23 +179,24 @@ def resolve_arg(spec: Any, job: str, meta: Dict[str, Any], ctx: Dict[str, Any]) 
 
 
 def check_when(cond: Any, job: str, meta: Dict[str, Any], ctx: Dict[str, Any]) -> bool:
-    """
-    Evaluate a step's `when` condition and return True if the step should run.
-
-    Supported forms:
-      - None: always run
-      - callable: cond(job, meta, ctx) -> truthy
-      - string/arg spec: resolved via resolve_arg() then cast to bool
-      - literal: bool(literal)
-
-    Example:
-        if check_when(step.get("when"), job, meta, ctx):
-            ...
-    """
+    """Evaluate a step's `when` condition and return True if the step should run."""
     if cond is None:
         return True
     if callable(cond):
         return bool(cond(job, meta, ctx))
+    if isinstance(cond, str):
+        for part in cond.split(" and "):
+            part = part.strip()
+            if part == "job":
+                if not job:
+                    return False
+                continue
+            key = part.split(".", 1)[-1]
+            if part not in ctx and key not in meta:
+                return False
+            if not resolve_arg(part, job, meta, ctx):
+                return False
+        return True
     return bool(resolve_arg(cond, job, meta, ctx))
 
 
