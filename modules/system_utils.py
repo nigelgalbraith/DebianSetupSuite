@@ -79,6 +79,20 @@ def check_folder_path(path: str) -> bool:
     return Path(os.path.expandvars(path)).expanduser().exists()
 
 
+def skip_operation(job: str, reason: str) -> bool:
+    """Print a skip message for an operation and return False."""
+    print(f"[SKIP]  '{job}': {reason}")
+    return False
+
+
+def is_missing(value, message: str = "") -> bool:
+    """Return True if a value is missing or empty, optionally printing a message."""
+    missing = not bool(value)
+    if missing and message:
+        print(f"[SKIP]  {message}")
+    return missing
+
+
 # ----------------------------------------------------------------------------
 # USER / GROUP MANAGEMENT
 # ----------------------------------------------------------------------------
@@ -447,7 +461,7 @@ def remove_paths(paths) -> bool:
 
 # ----------------------------------------------------------------------------
 # COPY / PERMISSIONS / FILE OPS
-# ----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------- 
 
 
 def copy_script_template(src: str | Path, dest: str | Path) -> bool:
@@ -496,7 +510,7 @@ def copy_files(files) -> bool:
             True,
         ):
             return False
-    return True       
+    return True  
 
 
 def remove_file(path: str | Path | None, optional: bool = False) -> bool:
@@ -524,8 +538,8 @@ def remove_file(path: str | Path | None, optional: bool = False) -> bool:
 
 
 def remove_files(files) -> bool:
-    """Remove a list of configured files."""
-    for file in files:
+    """Remove a list of configured files; return True if empty or all succeed."""
+    for file in files or []:
         if not remove_file(
             file.get("Dest"),
             True,
@@ -600,15 +614,14 @@ def remove_folder(path: str | Path | None, optional: bool = False) -> bool:
 
 
 def remove_folders(folders) -> bool:
-    """Remove a list of configured folders."""
-    for folder in folders:
+    """Remove a list of configured folders; return True if empty or all succeed."""
+    for folder in folders or []:
         if not remove_folder(
             folder.get("Dest"),
             True,
         ):
             return False
     return True
-
 
 
 def copy_file_dict(mapping: Any) -> bool:

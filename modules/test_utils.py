@@ -57,7 +57,7 @@ def ensure_executable(path: Path) -> bool:
 def run_tests(tests: list[dict]) -> bool:
     """Run a list of test definitions."""
     all_ok = True
-    for test in tests:
+    for test in tests or []:
         label = test.get("label", "unnamed-test")
         raw_path = test.get("path", "")
         port = test.get("port")

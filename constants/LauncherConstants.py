@@ -271,22 +271,58 @@ DEPENDENCIES = ["wget", "dpkg", "openbox"]
 PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
     "INSTALL": {
         "pipeline": {
-            download_deb_file: {"args": ["job", KEY_DOWNLOAD_URL, KEY_DOWNLOAD_DIR], "result": "download_ok"},
-            install_deb_file:  {"args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb", "job"], "result": "installed", "when": lambda j, m, c: bool(c.get("download_ok"))},
-            install_packages: {
-                "args": [lambda j, m, c: [
-                    m[KEY_DEFAULT_DM]["package"],
-                    m[KEY_KIOSK_DM]["package"]
-                ] + m.get(KEY_ADDITIONAL_PKGS, [])],
-                "result": "pkgs_installed"
+            download_deb_file: {
+                "args": ["job", KEY_DOWNLOAD_URL, KEY_DOWNLOAD_DIR],
+                "result": "download_ok",
             },
-
-            handle_cleanup: {"args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb"], "result": "cleaned", "when": lambda j, m, c: bool(c.get("download_ok"))},
-            create_user_login: {"args": [lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher")], "result": "user_ok"},
-            add_user_to_group: {"args": [lambda j, m, c: m.get(KEY_USERS, []), lambda j, m, c: m.get(KEY_USER_GROUPS, [])], "result": "groups_added"},
-            make_dirs: {"args": [KEY_SETUP_DIRS], "result": "setup_dirs_ok"},
-            copy_file_dict:    {"args": [lambda j, m, c: (m.get(KEY_KIOSK_FILES, []) or []) + (m.get(KEY_SETTINGS_FILES, []) or [])], "result": "files_copied"},
-            copy_folder_dict: {"args": [KEY_SETTINGS_FOLDERS], "result": "settings_folders_copied"},
+            install_deb_file: {
+                "args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb", "job",],
+                "result": "installed",
+                "when": "download_ok",
+            },
+            install_packages: {
+                "args": [
+                    lambda j, m, c: [
+                        m[KEY_DEFAULT_DM]["package"],
+                        m[KEY_KIOSK_DM]["package"],
+                    ] + m.get(KEY_ADDITIONAL_PKGS, []),
+                ],
+                "result": "pkgs_installed",
+            },
+            handle_cleanup: {
+                "args": [
+                    lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb",
+                ],
+                "result": "cleaned",
+                "when": "pkgs_installed",
+            },
+            create_user_login: {
+                "args": [
+                    lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher"),
+                ],
+                "result": "user_ok",
+            },
+            add_user_to_group: {
+                "args": [
+                    lambda j, m, c: m.get(KEY_USERS, []),
+                    lambda j, m, c: m.get(KEY_USER_GROUPS, []),
+                ],
+                "result": "groups_added",
+            },
+            make_dirs: {
+                "args": [KEY_SETUP_DIRS],
+                "result": "setup_dirs_ok",
+            },
+            copy_file_dict: {
+                "args": [
+                    lambda j, m, c: (m.get(KEY_KIOSK_FILES, []) or []) + (m.get(KEY_SETTINGS_FILES, []) or []),
+                ],
+                "result": "files_copied",
+            },
+            copy_folder_dict: {
+                "args": [KEY_SETTINGS_FOLDERS],
+                "result": "settings_folders_copied",
+            },
         },
         "label": INSTALLED_LABEL,
         "success_key": "installed",

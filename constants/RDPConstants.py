@@ -168,12 +168,12 @@ PIPELINE_STATES = {
             ensure_user_exists: {
                 "args": [KEY_USER_NAME],
                 "result": "user_ok",
-                "when":  (lambda j, m, c: bool(c.get("pkg_installed"))),
+                "when": "pkg_installed",
             },
             configure_xsession: {
                 "args": [KEY_SESSION_CMD, KEY_XSESSION, KEY_SKEL_DIR, KEY_HOME_BASE],
                 "result": "xsession_ok",
-                "when":  (lambda j, m, c: bool(c.get("user_ok"))),
+                "when": "user_ok",
             },
             configure_group_access: {
                 "args": [KEY_USER_NAME, KEY_GROUPS],
@@ -182,11 +182,11 @@ PIPELINE_STATES = {
             enable_and_start_service: {
                 "args": [KEY_SERVICE_NAME],
                 "result": "enabled",
-                "when":  (lambda j, m, c: bool(c.get("xsession_ok"))),
+                "when": "xsession_ok",
             },
         },
         "label": INSTALLED_LABEL,
-        "success_key": "enabled",              
+        "success_key": "enabled",
         "post_state": "CONFIG_LOADING",
     },
     "UNINSTALL": {

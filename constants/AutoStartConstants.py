@@ -157,19 +157,17 @@ PIPELINE_STATES = {
         "pipeline": {
             copy_script_template: {
                 "args": [f"meta.{KEY_SCRIPT_SRC}", f"meta.{KEY_SCRIPT_DEST}"],
-                "result": "_",
+                "result": "script_copied",
             },
             "copy_files": {
                 "fn": copy_files,
                 "args": [f"meta.{KEY_OPTIONAL_FILES}"],
-                "when": f"meta.{KEY_OPTIONAL_FILES}",
-                "result": "_",
+                "result": "files_copied",
             },
             "copy_folders": {
                 "fn": copy_folders,
                 "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
-                "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
-                "result": "_",
+                "result": "folders_copied",
             },
             install_autostart: {
                 "args": [
@@ -191,24 +189,25 @@ PIPELINE_STATES = {
                     f"meta.{KEY_AUTOSTART_NAME}",
                     f"meta.{KEY_USERS}",
                 ],
-                "result": "_",
+                "result": "removed_autostart",
             },
             "remove_script_file": {
                 "fn": remove_file,
                 "args": [f"meta.{KEY_SCRIPT_DEST}"],
-                "result": "_",
+                "when": "removed_autostart",
+                "result": "removed_script",
             },
             "remove_files": {
                 "fn": remove_files,
                 "args": [f"meta.{KEY_OPTIONAL_FILES}"],
-                "when": f"meta.{KEY_OPTIONAL_FILES}",
-                "result": "_",
+                "when": "removed_script",
+                "result": "removed_files",
             },
             "remove_folders": {
                 "fn": remove_folders,
                 "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
-                "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
-                "result": "_",
+                "when": "removed_files",
+                "result": "ok",
             },
         },
         "label": UNINSTALLED_LABEL,

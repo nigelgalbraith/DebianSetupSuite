@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from modules.docker_utils import (
-    docker_image_exists,
+    docker_image_doesnt_exist,
     build_docker_container,
     start_container,
     stop_container,
@@ -14,10 +14,14 @@ from modules.docker_utils import (
     compose_down,
     status_compose,
     docker_workload_running,
-    remove_container,
+    remove_container, 
 )
 from modules.archive_utils import download_archive_file, install_archive_file, handle_cleanup
-from modules.system_utils import expand_path, add_current_user_to_group
+from modules.system_utils import (
+    expand_path, 
+    add_current_user_to_group, 
+    is_missing,
+)   
 from modules.display_utils import display_config_doc
 from modules.test_utils import run_tests
 
@@ -203,28 +207,20 @@ OPTIONAL_PLAN_COLUMNS = {}
 PIPELINE_STATES = {
     "DOWNLOAD": {
         "pipeline": {
-            (lambda job: (print(f"[SKIP]  '{job}': no Download/TmpDir configured.") or False)): {
-                "args": ["job"],
-                "when": (lambda job, meta, ctx: (not meta.get(KEY_DOWNLOAD)) or (not meta.get(KEY_TMPDIR))),
-                "result": "ok",
-            },
             download_archive_file: {
                 "args": [f"meta.{KEY_NAME}", f"meta.{KEY_DOWNLOAD}", f"meta.{KEY_TMPDIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_DOWNLOAD)) and bool(meta.get(KEY_TMPDIR))),
                 "result": "archive",
             },
             install_archive_file: {
                 "args": [
                     (lambda job, meta, ctx: ctx.get("archive")),
-                    f"meta.{KEY_LOCATION}",
-                    True,
-                ],
-                "when": (lambda job, meta, ctx: bool(ctx.get("archive")) and bool(meta.get(KEY_LOCATION))),
-                "result": "ok",
+                    f"meta.{KEY_LOCATION}", True,],
+                "when": "archive",
+                "result": "installed",
             },
             handle_cleanup: {
                 "args": [(lambda job, meta, ctx: ctx.get("archive"))],
-                "when": (lambda job, meta, ctx: bool(ctx.get("archive"))),
+                "when": "installed",
                 "result": "_",
             },
         },
@@ -234,35 +230,35 @@ PIPELINE_STATES = {
     },
     "START": {
         "pipeline": {
-            # --- Compose start ---
             compose_up: {
                 "args": [f"meta.{KEY_COMPOSE_FILE}", f"meta.{KEY_COMPOSE_DIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": f"meta.{KEY_COMPOSE_FILE}",
                 "result": "ok",
             },
-            # --- Single container start ---
-            docker_image_exists: {
-                "args": [lambda job, meta, ctx: meta.get(KEY_IMAGE, "")],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
-                "result": "has_image",
+            is_missing: {
+                "args": [
+                    lambda job, meta, ctx: meta.get(KEY_COMPOSE_FILE),
+                    "No Compose file configured; using single container.",
+                ],
+                "result": "single_container",
             },
-            (lambda path: (expand_path(path).mkdir(parents=True, exist_ok=True) or True)): {
-                "args": [f"meta.{KEY_LOCATION}"],
-                "when": (lambda job, meta, ctx: (not bool(meta.get(KEY_COMPOSE_FILE))) and bool(meta.get(KEY_LOCATION))),
-                "result": "_",
+            docker_image_doesnt_exist: {
+                "args": [f"meta.{KEY_IMAGE}"],
+                "when": "single_container",
+                "result": "image_missing",
             },
             build_docker_container: {
                 "args": [
                     f"meta.{KEY_NAME}",
-                    (lambda job, meta, ctx: str(expand_path(meta.get(KEY_LOCATION, "")))),
+                    f"meta.{KEY_LOCATION}",
                     f"meta.{KEY_IMAGE}",
                 ],
-                "when": (lambda job, meta, ctx: (not bool(meta.get(KEY_COMPOSE_FILE))) and (not bool(ctx.get("has_image"))) and bool(meta.get(KEY_LOCATION))),
-                "result": "_",
+                "when": "image_missing",
+                "result": "image_built",
             },
             start_container: {
                 "args": [f"meta.{KEY_NAME}", f"meta.{KEY_PORT}", f"meta.{KEY_IMAGE}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": "single_container",
                 "result": "ok",
             },
         },
@@ -272,14 +268,21 @@ PIPELINE_STATES = {
     },
     "STATUS": {
         "pipeline": {
+            is_missing: {
+                "args": [
+                    lambda job, meta, ctx: meta.get(KEY_COMPOSE_FILE),
+                    "No Compose file configured; using single container.",
+                ],
+                "result": "single_container",
+            },
             status_compose: {
                 "args": ["job", f"meta.{KEY_COMPOSE_CONTAINERS}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": f"meta.{KEY_COMPOSE_FILE}",
                 "result": "ok",
             },
             status_container: {
                 "args": [f"meta.{KEY_NAME}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": "single_container",
                 "result": "ok",
             },
         },
@@ -289,30 +292,37 @@ PIPELINE_STATES = {
     },
     "BUILD": {
         "pipeline": {
+            is_missing: {
+                "args": [
+                    lambda job, meta, ctx: meta.get(KEY_COMPOSE_FILE),
+                    "No Compose file configured; using single container.",
+                ],
+                "result": "single_container",
+            },
             compose_down: {
                 "args": [f"meta.{KEY_COMPOSE_FILE}", f"meta.{KEY_COMPOSE_DIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
-                "result": "_",
+                "when": f"meta.{KEY_COMPOSE_FILE}",
+                "result": "compose_stopped",
             },
             compose_build: {
                 "args": [f"meta.{KEY_COMPOSE_FILE}", f"meta.{KEY_COMPOSE_DIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
-                "result": "_",
+                "when": "compose_stopped",
+                "result": "compose_built",
             },
             compose_up: {
                 "args": [f"meta.{KEY_COMPOSE_FILE}", f"meta.{KEY_COMPOSE_DIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": "compose_built",
                 "result": "ok",
             },
             stop_container: {
                 "args": [f"meta.{KEY_NAME}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
-                "result": "_",
+                "when": "single_container",
+                "result": "container_stopped",
             },
             remove_container: {
                 "args": [f"meta.{KEY_NAME}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
-                "result": "_",
+                "when": "container_stopped",
+                "result": "container_removed",
             },
             build_docker_container: {
                 "args": [
@@ -320,12 +330,12 @@ PIPELINE_STATES = {
                     f"meta.{KEY_LOCATION}",
                     f"meta.{KEY_IMAGE}",
                 ],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
-                "result": "_",
+                "when": "container_removed",
+                "result": "image_built",
             },
             start_container: {
                 "args": [f"meta.{KEY_NAME}", f"meta.{KEY_PORT}", f"meta.{KEY_IMAGE}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": "image_built",
                 "result": "ok",
             },
         },
@@ -337,7 +347,6 @@ PIPELINE_STATES = {
         "pipeline": {
             run_tests: {
                 "args": [f"meta.Tests"],
-                "when": (lambda job, meta, ctx: bool(meta.get("Tests"))),
                 "result": "ok",
             },
         },
@@ -347,16 +356,21 @@ PIPELINE_STATES = {
     },
     "STOP": {
         "pipeline": {
-            # Compose stop
+            is_missing: {
+                "args": [
+                    lambda job, meta, ctx: meta.get(KEY_COMPOSE_FILE),
+                    "No Compose file configured; using single container.",
+                ],
+                "result": "single_container",
+            },
             compose_down: {
                 "args": [f"meta.{KEY_COMPOSE_FILE}", f"meta.{KEY_COMPOSE_DIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": f"meta.{KEY_COMPOSE_FILE}",
                 "result": "ok",
             },
-            # Single container stop
             stop_container: {
                 "args": [f"meta.{KEY_NAME}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": "single_container",
                 "result": "ok",
             },
         },
@@ -366,14 +380,21 @@ PIPELINE_STATES = {
     },
     "REMOVE": {
         "pipeline": {
+            is_missing: {
+                "args": [
+                    lambda job, meta, ctx: meta.get(KEY_COMPOSE_FILE),
+                    "No Compose file configured; using single container.",
+                ],
+                "result": "single_container",
+            },
             compose_down: {
                 "args": [f"meta.{KEY_COMPOSE_FILE}", f"meta.{KEY_COMPOSE_DIR}"],
-                "when": (lambda job, meta, ctx: bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": f"meta.{KEY_COMPOSE_FILE}",
                 "result": "ok",
             },
             remove_container: {
                 "args": [f"meta.{KEY_NAME}"],
-                "when": (lambda job, meta, ctx: not bool(meta.get(KEY_COMPOSE_FILE))),
+                "when": "single_container",
                 "result": "ok",
             },
         },

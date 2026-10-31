@@ -127,7 +127,7 @@ DEPENDENCIES = ["wget", "dpkg"]
 
 # === PIPELINES  ===
 PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
-    "INSTALL": {
+"INSTALL": {
         "pipeline": {
             download_deb_file: {
                 "args": ["job", KEY_DOWNLOAD_URL, KEY_DOWNLOAD_DIR],
@@ -136,17 +136,17 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
             install_deb_file: {
                 "args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb", "job"],
                 "result": "installed",
-                "when":  lambda j, m, c: bool(c.get("download_ok")),
+                "when": "download_ok",
             },
             start_service_standard: {
                 "args": [lambda j, m, c: m.get("ServiceName", j)],
-                "when":  lambda j, m, c: bool(m.get(KEY_ENABLE_SERVICE)),
+                "when": KEY_ENABLE_SERVICE,
                 "result": "service_started",
             },
             handle_cleanup: {
                 "args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb"],
                 "result": "cleaned",
-                "when":  lambda j, m, c: bool(c.get("download_ok")),
+                "when": "download_ok",
             },
         },
         "label": INSTALLED_LABEL,
