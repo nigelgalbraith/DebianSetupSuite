@@ -184,19 +184,17 @@ def restart_user_service(service_name: str) -> bool:
     return False
     
 
-def start_service_standard(service: str) -> bool:
-    """
-    Enable and start a systemd service unconditionally; return True on success.
-
-    If `service` is blank, returns True (no-op).
-    """
+def start_service_standard(service: str, service_name: str | None = None) -> bool:
+    """Enable and start a systemd service."""
+    service = service_name or service
     if not service:
         return True
     try:
         subprocess.run(["systemctl", "enable", service], check=True)
         subprocess.run(["systemctl", "start", service], check=True)
         return True
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        print(f"[start_service_standard] ERROR: Failed to enable/start '{service}': {e}")
         return False
 
 # ---------------------------------------------------------------------

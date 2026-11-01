@@ -125,19 +125,26 @@ def install_archive_file(archive_path: Path | str, extract_to: Path | str, strip
         return False
 
 
-def uninstall_archive_install(target_path: Path | str) -> bool:
-    """Remove an installed archive target (file or directory) and return True if something was removed."""
+
+def uninstall_archive_install(check_path: Path | str | None, extract_to: Path | str) -> bool:
+    """Remove CheckPath if provided, otherwise remove ExtractTo."""
+    target = check_path or extract_to
     try:
-        p = Path(target_path)
+        p = Path(target)
         if p.is_dir():
             shutil.rmtree(p)
+            print(f"[uninstall_archive_install] Removed directory: {p}")
             return True
         if p.exists():
             p.unlink()
+            print(f"[uninstall_archive_install] Removed file: {p}")
             return True
+        print(f"[uninstall_archive_install] Target not found: {p}")
         return False
-    except Exception:
+    except Exception as e:
+        print(f"[uninstall_archive_install] ERROR: {e}")
         return False
+
 
 # ---------------------------------------------------------------------
 # LINKS / CLEANUP
@@ -163,43 +170,64 @@ def create_symlink(target: Path | str, link_path: Path | str) -> bool:
         return False
 
 
-def handle_cleanup(archive_path: Path) -> bool:
-    """Delete a temporary archive file and return True on success."""
+
+def handle_cleanup(archive_path: Path | str, name: str | None = None) -> bool:
+    """Delete a temporary archive or DEB file."""
     try:
-        archive_path.unlink(missing_ok=True)
+        path = Path(archive_path)
+        if name:
+            path = path / f"{name}.deb"
+        path.unlink(missing_ok=True)
+        print(f"[handle_cleanup] Removed: {path}")
         return True
-    except Exception:
+    except Exception as e:
+        print(f"[handle_cleanup] ERROR: Could not remove {archive_path}: {e}")
         return False
+
 
 # ---------------------------------------------------------------------
 # ARCHIVE CREATION
 # ---------------------------------------------------------------------
 
 
+
 def create_zip_archive(zips):
-    """
-    Create one or more zip archives from (src, output) tuples.
-
-    If `zips` is a single tuple, it is treated as a one-item list. Each source directory is
-    walked recursively and file paths are stored relative to the source root.
-
-    Example:
-        create_zip_archive(("/home/me/project", "/tmp/project.zip"))
-    """
-    if isinstance(zips, tuple):
+    """Create zip archives from dictionaries or (src, output) tuples."""
+    if isinstance(zips, (tuple, dict)):
         zips = [zips]
     if not zips:
         print("[INFO] No zip archives to create.")
         return True
-    for src, output in zips:
+    success = True
+    for item in zips:
+        if isinstance(item, dict):
+            if not item.get("src") or not item.get("output"):
+                print(f"[create_zip_archive] ERROR: Missing or empty 'src' or 'output': {item}")
+                success = False
+                continue
+            src, output = item["src"], item["output"]
+        else:
+            try:
+                src, output = item
+            except (TypeError, ValueError):
+                print(f"[create_zip_archive] ERROR: Expected (src, output) tuple, got: {item}")
+                success = False
+                continue
         src_path = Path(os.path.expandvars(os.path.expanduser(src)))
         out_path = Path(os.path.expandvars(os.path.expanduser(output)))
-        if not src_path.exists():
-            print(f"[create_zip_archive] Source not found: {src_path}")
+        if not src_path.is_dir():
+            print(f"[create_zip_archive] ERROR: Source directory not found: {src_path}")
+            success = False
             continue
-        with ZipFile(out_path, "w") as zipf:
-            for p in src_path.rglob("*"):
-                if p.is_file():
-                    zipf.write(p, p.relative_to(src_path))
-        print(f"[create_zip_archive] Created: {out_path}")
-    return True
+        try:
+            with ZipFile(out_path, "w") as zipf:
+                for p in src_path.rglob("*"):
+                    if p.is_file():
+                        zipf.write(p, p.relative_to(src_path))
+            print(f"[create_zip_archive] Created: {out_path}")
+        except (OSError, ValueError) as e:
+            print(f"[create_zip_archive] ERROR: Could not create {out_path}: {e}")
+            success = False
+    return success
+
+

@@ -139,6 +139,7 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
@@ -149,14 +150,16 @@ PIPELINE_STATES = {
             },
             install_archive_file: {
                 "args": ["archive_path", KEY_EXTRACT_TO, KEY_STRIP_TOP_LEVEL],
+                "when": "archive_path",
                 "result": "installed",
             },
             handle_cleanup: {
                 "args": [KEY_DOWNLOAD_PATH],
+                "when": "installed",
             },
             run_commands: {
                 "args": [KEY_POST_INSTALL],
-
+                "when": "installed",
             },
         },
         "label": INSTALLED_LABEL,
@@ -166,16 +169,17 @@ PIPELINE_STATES = {
     "UNINSTALL": {
         "pipeline": {
             uninstall_archive_install: {
-                "args": [lambda j, m, c: (m.get(KEY_CHECK_PATH) or m.get(KEY_EXTRACT_TO))],
+                "args": [f"?{KEY_CHECK_PATH}", KEY_EXTRACT_TO],
                 "result": "uninstalled",
             },
             remove_paths: {
-                "args": [lambda j, m, c: [m.get(KEY_EXTRACT_TO)] + (m.get(KEY_TRASH_PATHS) or [])]        
+                "args": [KEY_EXTRACT_TO, f"?{KEY_TRASH_PATHS}"],
+                "when": "uninstalled",
             },
             run_commands: {
                 "args": [KEY_POST_UNINSTALL],
+                "when": "uninstalled",
             },
-
         },
         "label": UNINSTALLED_LABEL,
         "success_key": "uninstalled",
@@ -193,4 +197,5 @@ PIPELINE_STATES = {
         "post_state": "CONFIG_LOADING",
     },
 }
+
 

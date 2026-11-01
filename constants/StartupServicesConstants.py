@@ -83,8 +83,8 @@ UNINSTALLED_LABEL = "DISABLED"
 
 # === STATUS CHECK CONFIG ===
 STATUS_FN_CONFIG = {
-    "fn": lambda job, meta: check_service_status(job),
-    "args": ["job", "meta"],
+    "fn": check_service_status,
+    "args": ["job"],
     "labels": {True: INSTALLED_LABEL, False: UNINSTALLED_LABEL},
 }
 
@@ -161,45 +161,44 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
         "pipeline": {
             install_logrotate_config: {
-                "args": [f"meta.{KEY_LOGROTATE}", f"meta.{KEY_LOG_NAME}"],
-                "when": f"meta.{KEY_LOGROTATE} and meta.{KEY_LOG_NAME}",
-                "result": "_",
+                "args": [KEY_LOGROTATE, KEY_LOG_NAME],
+                "when": [f"meta.{KEY_LOGROTATE}", f"meta.{KEY_LOG_NAME}"],
+                "result": "logrotate_ok",
             },
             copy_script_template: {
-                "args": [f"meta.{KEY_SCRIPT_SRC}", f"meta.{KEY_SCRIPT_DEST}"],
-                "result": "_",
+                "args": [KEY_SCRIPT_SRC, KEY_SCRIPT_DEST],
+                "result": "script_copied",
             },
-            "copy_files": {
-                "fn": copy_files,
-                "args": [f"meta.{KEY_OPTIONAL_FILES}"],
+            copy_files: {
+                "args": [f"?{KEY_OPTIONAL_FILES}"],
                 "when": f"meta.{KEY_OPTIONAL_FILES}",
-                "result": "_",
+                "result": "files_copied",
             },
-            "copy_folders": {
-                "fn": copy_folders,
-                "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
+            copy_folders: {
+                "args": [f"?{KEY_OPTIONAL_FOLDERS}"],
                 "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
-                "result": "_",
+                "result": "folders_copied",
             },
             "copy_service_file": {
                 "fn": copy_file,
-                "args": [
-                    f"meta.{KEY_SERVICE_SRC}",
-                    f"meta.{KEY_SERVICE_DEST}",
-                ],
-                "result": "_",
+                "args": [KEY_SERVICE_SRC, KEY_SERVICE_DEST],
+                "when": "script_copied",
+                "result": "service_copied",
             },
             reload_systemd: {
                 "args": [],
-                "result": "_",
+                "when": "service_copied",
+                "result": "reloaded",
             },
             enable_and_start_service: {
                 "args": ["job"],
+                "when": "reloaded",
                 "result": "ok",
             },
         },
@@ -210,43 +209,44 @@ PIPELINE_STATES = {
     "UNINSTALL": {
         "pipeline": {
             remove_logrotate_config: {
-                "args": [f"meta.{KEY_LOG_NAME}"],
+                "args": [KEY_LOG_NAME],
                 "when": f"meta.{KEY_LOG_NAME}",
-                "result": "_",
+                "result": "logrotate_removed",
             },
             stop_and_disable_service: {
                 "args": ["job"],
-                "result": "_",
+                "result": "stopped",
             },
             "remove_service_file": {
                 "fn": remove_file,
-                "args": [f"meta.{KEY_SERVICE_DEST}"],
-                "result": "_",
+                "args": [KEY_SERVICE_DEST],
+                "when": "stopped",
+                "result": "service_removed",
             },
             reload_systemd: {
                 "args": [],
-                "result": "_",
+                "when": "service_removed",
+                "result": "reloaded",
             },
             "remove_script_file": {
                 "fn": remove_file,
-                "args": [f"meta.{KEY_SCRIPT_DEST}"],
-                "result": "_",
+                "args": [KEY_SCRIPT_DEST],
+                "when": "reloaded",
+                "result": "script_removed",
             },
-            "remove_files": {
-                "fn": remove_files,
-                "args": [f"meta.{KEY_OPTIONAL_FILES}"],
+            remove_files: {
+                "args": [f"?{KEY_OPTIONAL_FILES}"],
                 "when": f"meta.{KEY_OPTIONAL_FILES}",
-                "result": "_",
+                "result": "files_removed",
             },
-            "remove_folders": {
-                "fn": remove_folders,
-                "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
+            remove_folders: {
+                "args": [f"?{KEY_OPTIONAL_FOLDERS}"],
                 "when": f"meta.{KEY_OPTIONAL_FOLDERS}",
-                "result": "_",
+                "result": "folders_removed",
             },
         },
         "label": UNINSTALLED_LABEL,
-        "success_key": "ok",
+        "success_key": "script_removed",
         "post_state": "CONFIG_LOADING",
     },
     "RESTART": {

@@ -125,35 +125,35 @@ SUB_MENU: Dict[str, str] = {
 # === DEPENDENCIES ===
 DEPENDENCIES = ["wget", "dpkg"]
 
-# === PIPELINES  ===
+
+# === PIPELINES ===
 PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
-"INSTALL": {
+    "INSTALL": {
         "pipeline": {
             download_deb_file: {
                 "args": ["job", KEY_DOWNLOAD_URL, KEY_DOWNLOAD_DIR],
                 "result": "download_ok",
             },
             install_deb_file: {
-                "args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb", "job"],
-                "result": "installed",
+                "args": [KEY_DOWNLOAD_DIR, "job"],
                 "when": "download_ok",
+                "result": "installed",
             },
             start_service_standard: {
-                "args": [lambda j, m, c: m.get("ServiceName", j)],
-                "when": KEY_ENABLE_SERVICE,
+                "args": ["job", "meta.ServiceName"],
+                "when": ["installed", f"meta.{KEY_ENABLE_SERVICE}"],
                 "result": "service_started",
             },
             handle_cleanup: {
-                "args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb"],
-                "result": "cleaned",
+                "args": [KEY_DOWNLOAD_DIR, "job"],
                 "when": "download_ok",
+                "result": "cleaned",
             },
         },
         "label": INSTALLED_LABEL,
         "success_key": "installed",
         "post_state": "CONFIG_LOADING",
     },
-
     "UNINSTALL": {
         "pipeline": {
             uninstall_packages: {
@@ -177,4 +177,5 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
         "post_state": "CONFIG_LOADING",
     },
 }
+
 

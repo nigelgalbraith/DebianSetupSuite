@@ -17,6 +17,8 @@ from modules.system_utils import (
     add_user_to_group,
     protect_folders,
     copy_file_dict,
+    group_exists,
+    user_not_in_group,
 )
 from modules.desktop_utils import (
     create_desktop_entry,
@@ -218,66 +220,87 @@ PIPELINE_STATES = {
             },
             install_archive_file: {
                 "args": ["archive_path", KEY_EXTRACT_TO, KEY_STRIP_TOP],
+                "when": "archive_path",
                 "result": "installed",
             },
             handle_cleanup: {
                 "args": ["archive_path"],
+                "when": "installed",
             },
             run_commands: {
                 "args": [KEY_POST_INSTALL],
+                "when": "installed",
             },
             create_group: {
-                "args": [lambda j, m, c: m.get(KEY_DOS_GROUPS)],
-                "result": "groups_ok",
+                "args": [f"?{KEY_DOS_GROUPS}"],
+                "when": "installed",
+                "result": "groups_created",
+            },
+            group_exists: {
+                "args": [f"?{KEY_DOS_GROUPS}"],
+                "when": "groups_created",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [f"?{KEY_DOS_USERS}", f"?{KEY_DOS_GROUPS}"],
+                "when": "group_exists",
+                "result": "user_needs_group",
             },
             add_user_to_group: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_DOS_USERS),
-                    lambda j, m, c: m.get(KEY_DOS_GROUPS),
-                ],
-                "result": "dos_groups_added",
+                "args": [f"?{KEY_DOS_USERS}", f"?{KEY_DOS_GROUPS}"],
+                "when": "user_needs_group",
             },
             chown_paths: {
                 "args": [
-                    lambda j, m, c: m.get(KEY_CHOWN_USER),
+                    f"?{KEY_CHOWN_USER}",
                     KEY_CHOWN_PATHS,
-                    lambda j, m, c: bool(m.get(KEY_CHOWN_RECURSIVE)),
-                    lambda j, m, c: m.get(KEY_CHOWN_GROUP),
+                    f"?{KEY_CHOWN_RECURSIVE}",
+                    f"?{KEY_CHOWN_GROUP}",
                 ],
+                "when": "installed",
                 "result": "chown_ok",
             },
             chmod_paths: {
                 "args": [KEY_CHMOD_PATHS],
+                "when": "installed",
                 "result": "chmod_ok",
             },
             protect_folders: {
                 "args": [KEY_PROTECTED_FOLDERS],
+                "when": "installed",
                 "result": "protected_ok",
             },
         },
         "label": INSTALLED_LABEL,
         "success_key": "installed",
         "post_state": "CONFIG_LOADING",
-        },
+    },
     "UPDATE_PERMISSIONS": {
         "pipeline": {
             create_group: {
-                "args": [lambda j, m, c: m.get(KEY_DOS_GROUPS)],
-                "result": "groups_ok",
+                "args": [f"?{KEY_DOS_GROUPS}"],
+                "result": "groups_created",
+            },
+            group_exists: {
+                "args": [f"?{KEY_DOS_GROUPS}"],
+                "when": "groups_created",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [f"?{KEY_DOS_USERS}", f"?{KEY_DOS_GROUPS}"],
+                "when": "group_exists",
+                "result": "user_needs_group",
             },
             add_user_to_group: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_DOS_USERS),
-                    lambda j, m, c: m.get(KEY_DOS_GROUPS),
-                ],
-                "result": "dos_groups_added",
+                "args": [f"?{KEY_DOS_USERS}", f"?{KEY_DOS_GROUPS}"],
+                "when": "user_needs_group",
             },
             chown_paths: {
                 "args": [
-                    lambda j, m, c: m.get(KEY_CHOWN_USER),
+                    f"?{KEY_CHOWN_USER}",
                     KEY_CHOWN_PATHS,
-                    lambda j, m, c: bool(m.get(KEY_CHOWN_RECURSIVE)),
-                    lambda j, m, c: m.get(KEY_CHOWN_GROUP),
+                    f"?{KEY_CHOWN_RECURSIVE}",
+                    f"?{KEY_CHOWN_GROUP}",
                 ],
                 "result": "chown_ok",
             },
@@ -296,22 +319,24 @@ PIPELINE_STATES = {
     },
     "CREATE_SHORTCUT": {
         "pipeline": {
+            copy_file_dict: {
+                "args": [KEY_ICO_FILE],
+                "result": "icons_copied",
+            },
             create_desktop_entry: {
                 "args": [
                     KEY_NAME,
                     KEY_LAUNCH_CMD,
-                    lambda j, m, c: m.get(KEY_CHOWN_USER),
+                    f"?{KEY_CHOWN_USER}",
                     KEY_ICON,
                     KEY_CATEGORY,
                 ],
+                "when": "icons_copied",
                 "result": "shortcut_created",
-            },
-            copy_file_dict: {
-                "args": [KEY_ICO_FILE],
-                "result": "settings_folders_copied",
             },
             refresh_desktop_database: {
                 "args": [],
+                "when": "shortcut_created",
                 "result": "desktop_cache_refreshed",
             },
         },
@@ -322,14 +347,12 @@ PIPELINE_STATES = {
     "REMOVE_SHORTCUT": {
         "pipeline": {
             remove_desktop_entry: {
-                "args": [
-                    KEY_NAME,
-                    lambda j, m, c: m.get(KEY_CHOWN_USER),
-                ],
+                "args": [KEY_NAME, f"?{KEY_CHOWN_USER}"],
                 "result": "shortcut_removed",
             },
             refresh_desktop_database: {
                 "args": [],
+                "when": "shortcut_removed",
                 "result": "desktop_cache_refreshed",
             },
         },

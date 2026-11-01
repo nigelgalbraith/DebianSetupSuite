@@ -100,23 +100,18 @@ def show_logs(log_paths: dict):
 
 
 def install_logrotate_config(template_path, target_name, target_dir="/etc/logrotate.d"):
-    """
-    Install a logrotate config file into the system logrotate directory.
-
-    Copies the template to `target_dir/target_name` and sets permissions to 0644.
-
-    Example:
-        install_logrotate_config("myapp.logrotate", "myapp")
-    """
+    """Install a logrotate configuration file."""
     dest_path = Path(target_dir) / target_name
     copyfile(template_path, dest_path)
     os.chmod(dest_path, 0o644)
     print(f"[OK]   Logrotate config installed → {dest_path}")
+    return True
 
 
 def remove_logrotate_config(log_name, target_dir="/etc/logrotate.d"):
-    """Remove a logrotate config file from the system logrotate directory if it exists."""
+    """Remove a logrotate configuration file if it exists."""
     path = Path(target_dir) / log_name
     if path.exists():
         path.unlink()
         print(f"[OK]   Logrotate config removed → {path}")
+    return True

@@ -126,15 +126,18 @@ PLAN_COLUMN_ORDER = [KEY_REMOTE]
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
         "pipeline": {
             ensure_flathub: {
                 "args": [],
+                "result": "flathub_ready",
             },
             install_flatpak_app: {
                 "args": ["job", KEY_REMOTE],
+                "when": "flathub_ready",
                 "result": "installed",
             },
         },
@@ -164,7 +167,6 @@ PIPELINE_STATES = {
         "success_key": "ok",
         "post_state": "CONFIG_LOADING",
     },
-
     "SHOW_CONFIG_DOC": {
         "pipeline": {
             display_config_doc: {
@@ -177,3 +179,4 @@ PIPELINE_STATES = {
         "post_state": "CONFIG_LOADING",
     },
 }
+

@@ -60,6 +60,7 @@ VALIDATION_CONFIG = {
         KEY_SERVICE_URL: str,
         KEY_PLAYLIST_FILE: str,
         KEY_USERNAME: str,
+        KEY_CAM_DIR: str,
         KEY_EPG_FILE: str,
         KEY_RESTART_SERVICE: bool,
         KEY_SERVICE_TEMPLATE: str,
@@ -187,105 +188,95 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
         "pipeline": {
             download_archive_file: {
-                "args": ["job", f"meta.{KEY_DOWNLOAD_URL}", f"meta.{KEY_TMPDIR}"],
-                "when": f"meta.{KEY_DOWNLOAD_URL} and meta.{KEY_TMPDIR}",
+                "args": ["job", KEY_DOWNLOAD_URL, KEY_TMPDIR],
                 "result": "archive",
             },
             install_archive_file: {
-                "args": ["archive", f"meta.{KEY_INSTALL_DIR}", True],
-                "when": "archive and meta.InstallDir",
-                "result": "ok",
+                "args": ["archive", KEY_INSTALL_DIR, True],
+                "when": "archive",
+                "result": "extracted",
             },
             find_extracted_binary: {
-                "args": [
-                    lambda j, m, c: expand_path(m.get(KEY_INSTALL_DIR, "")),
-                    f"meta.{KEY_BINARY_NAME}",
-                ],
-                "when": f"meta.{KEY_INSTALL_DIR} and meta.{KEY_BINARY_NAME}",
+                "args": [KEY_INSTALL_DIR, KEY_BINARY_NAME],
+                "when": "extracted",
                 "result": "bin_path",
             },
             create_symlink: {
-                "args": ["bin_path", f"meta.{KEY_SYMLINK_PATH}"],
-                "when": f"meta.{KEY_SYMLINK_PATH}",
-                "result": "_",
+                "args": ["bin_path", KEY_SYMLINK_PATH],
+                "when": "bin_path",
+                "result": "linked",
             },
             write_m3u: {
-                "args": [f"meta.{KEY_CAMERAS}", f"meta.{KEY_PLAYLIST_FILE}"],
-                "result": "_",
+                "args": [KEY_CAMERAS, KEY_PLAYLIST_FILE],
+                "when": "linked",
+                "result": "playlist_created",
             },
             ensure_dummy_xmltv: {
-                "args": [
-                    lambda j, m, c: expand_path(m.get(KEY_EPG_FILE, "")),
-                    f"meta.{KEY_CAMERAS}",
-                ],
-                "result": "_",
+                "args": [KEY_EPG_FILE, KEY_CAMERAS],
+                "when": "playlist_created",
+                "result": "epg_ready",
             },
             create_user: {
-                "args": [f"meta.{KEY_USERNAME}"],
-                "when": f"meta.{KEY_USERNAME}",
-                "result": "_",
+                "args": [KEY_USERNAME],
+                "when": "epg_ready",
+                "result": "user_ready",
             },
             fix_permissions: {
-                "args": [f"meta.{KEY_USERNAME}", f"meta.{KEY_CAM_DIR}"],
-                "when": f"meta.{KEY_USERNAME} and meta.{KEY_CAM_DIR}",
-                "result": "_",
+                "args": [KEY_USERNAME, KEY_CAM_DIR],
+                "when": "user_ready",
             },
             create_service: {
-                "args": [f"meta.{KEY_SERVICE_TEMPLATE}", f"meta.{KEY_SERVICE_DEST}"],
-                "result": "_",
+                "args": [KEY_SERVICE_TEMPLATE, KEY_SERVICE_DEST],
+                "when": "user_ready",
+                "result": "service_created",
             },
             enable_and_start_service: {
-                "args": ["job"], 
-                "result": "ok",
+                "args": ["job"],
+                "when": "service_created",
+                "result": "started",
             },
             handle_cleanup: {
                 "args": ["archive"],
-                "when": "archive",
-                "result": "_",
+                "when": "started",
             },
             run_commands: {
-                "args": [f"meta.{KEY_INSTRUCTIONS}"],
-                "when": f"meta.{KEY_INSTRUCTIONS}",
-                "result": "_",
+                "args": [f"?{KEY_INSTRUCTIONS}"],
+                "when": ["started", f"meta.{KEY_INSTRUCTIONS}"],
             },
         },
         "label": INSTALLED_LABEL,
-        "success_key": "ok",
+        "success_key": "started",
         "post_state": "CONFIG_LOADING",
     },
     "UNINSTALL": {
         "pipeline": {
             stop_and_disable_service: {
                 "args": ["job"],
-                "result": "_",
+                "result": "stopped",
             },
             "remove_service_dest": {
                 "fn": remove_file,
-                "args": [f"meta.{KEY_SERVICE_DEST}"],
-                "result": "_",
+                "args": [KEY_SERVICE_DEST],
             },
             "remove_symlink": {
                 "fn": remove_file,
-                "args": [f"meta.{KEY_SYMLINK_PATH}"],
-                "result": "_",
+                "args": [KEY_SYMLINK_PATH],
             },
             uninstall_archive_install: {
-                "args": [f"meta.{KEY_INSTALL_DIR}"],
-                "when": f"meta.{KEY_INSTALL_DIR}",
-                "result": "_",
+                "args": [None, KEY_INSTALL_DIR],
             },
             remove_m3u: {
-                "args": [f"meta.{KEY_PLAYLIST_FILE}"],
-                "result": "_",
+                "args": [KEY_PLAYLIST_FILE],
             },
             "remove_epg": {
                 "fn": remove_file,
-                "args": [f"meta.{KEY_EPG_FILE}"],
+                "args": [KEY_EPG_FILE],
                 "result": "ok",
             },
         },
@@ -316,3 +307,4 @@ PIPELINE_STATES = {
         "post_state": "CONFIG_LOADING",
     },
 }
+

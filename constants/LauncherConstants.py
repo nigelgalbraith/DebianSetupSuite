@@ -11,6 +11,7 @@ from modules.package_utils import (
     install_deb_file,
     uninstall_packages,
     install_packages,
+    get_packages,   
 )
 from modules.service_utils import (
     restart_service,
@@ -20,8 +21,9 @@ from modules.system_utils import (
     copy_folder_dict,
     chmod_paths, chown_paths,
     create_user_login,
-    remove_user,
-    kill_user_session,
+    create_group,
+    group_exists,
+    user_not_in_group,
     add_user_to_group,
     make_dirs,
     set_default_display_manager,
@@ -89,6 +91,7 @@ VALIDATION_CONFIG: Dict[str, Any] = {
         KEY_DEFAULT_DM: dict,   
         KEY_KIOSK_DM: dict,    
         KEY_ADDITIONAL_PKGS: list,
+        KEY_CHOWN_USER: str,
         KEY_CHMOD_PATHS: list,
         KEY_CHOWN_PATHS: list,
         KEY_CHOWN_RECURSIVE: (bool, type(None)),
@@ -99,44 +102,72 @@ VALIDATION_CONFIG: Dict[str, Any] = {
 }
 
 # === SECONDARY VALIDATION  ===
+
+# === SECONDARY VALIDATION ===
 SECONDARY_VALIDATION: Dict[str, Any] = {
     KEY_SETTINGS_FILES: {
-        "required_job_fields": {KEY_COPY_NAME: str, KEY_SRC: str, KEY_DEST: str},
+        "required_job_fields": {
+            KEY_COPY_NAME: str,
+            KEY_SRC: str,
+            KEY_DEST: str,
+        },
         "allow_empty": True,
     },
     KEY_KIOSK_FILES: {
-        "required_job_fields": {KEY_COPY_NAME: str, KEY_SRC: str, KEY_DEST: str},
+        "required_job_fields": {
+            KEY_COPY_NAME: str,
+            KEY_SRC: str,
+            KEY_DEST: str,
+        },
         "allow_empty": True,
     },
     KEY_SETTINGS_FOLDERS: {
-        "required_job_fields": {KEY_COPY_NAME: str, KEY_SRC: str, KEY_DEST: str},
+        "required_job_fields": {
+            KEY_COPY_NAME: str,
+            KEY_SRC: str,
+            KEY_DEST: str,
+        },
         "allow_empty": True,
     },
     KEY_REMOVE_PATHS: {
         "allow_empty": True,
     },
     KEY_CHOWN_PATHS: {
-        "required_job_fields": {"path": str},
-        "allow_empty": True
+        "required_job_fields": {
+            "path": str,
+        },
+        "allow_empty": True,
     },
     KEY_SETTINGS_CHMOD_PATHS: {
-        "required_job_fields": {"path": str, "mode": str},
-        "allow_empty": True
+        "required_job_fields": {
+            "path": str,
+            "mode": str,
+        },
+        "allow_empty": True,
     },
     KEY_SETTINGS_CHOWN_PATHS: {
-        "required_job_fields": {"path": str},
-        "allow_empty": True
+        "required_job_fields": {
+            "path": str,
+        },
+        "allow_empty": True,
     },
     KEY_DEFAULT_DM: {
-        "required_job_fields": {"package": str, "service": str},
-        "allow_empty": False
+        "required_job_fields": {
+            "package": str,
+            "service": str,
+        },
+        "allow_empty": False,
     },
     KEY_KIOSK_DM: {
-        "required_job_fields": {"package": str, "service": str},
-        "allow_empty": False
+        "required_job_fields": {
+            "package": str,
+            "service": str,
+        },
+        "allow_empty": False,
     },
     "example_config": CONFIG_DOC,
 }
+
 
 # === DETECTION CONFIG ===
 DETECTION_CONFIG: Dict[str, Any] = {
@@ -267,7 +298,8 @@ SUB_MENU: Dict[str, str] = {
 # === DEPENDENCIES ===
 DEPENDENCIES = ["wget", "dpkg", "openbox"]
 
-# === PIPELINES  ===
+
+# === PIPELINES ===
 PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
     "INSTALL": {
         "pipeline": {
@@ -276,157 +308,272 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
                 "result": "download_ok",
             },
             install_deb_file: {
-                "args": [lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb", "job",],
-                "result": "installed",
+                "args": [KEY_DOWNLOAD_DIR, "job"],
                 "when": "download_ok",
+                "result": "installed",
+            },
+            get_packages: {
+                "args": [KEY_DEFAULT_DM, KEY_KIOSK_DM, KEY_ADDITIONAL_PKGS],
+                "when": "installed",
+                "result": "packages",
             },
             install_packages: {
-                "args": [
-                    lambda j, m, c: [
-                        m[KEY_DEFAULT_DM]["package"],
-                        m[KEY_KIOSK_DM]["package"],
-                    ] + m.get(KEY_ADDITIONAL_PKGS, []),
-                ],
+                "args": ["packages"],
+                "when": "packages",
                 "result": "pkgs_installed",
             },
             handle_cleanup: {
-                "args": [
-                    lambda j, m, c: Path(m[KEY_DOWNLOAD_DIR]) / f"{j}.deb",
-                ],
-                "result": "cleaned",
+                "args": [KEY_DOWNLOAD_DIR, "job"],
                 "when": "pkgs_installed",
+                "result": "cleaned",
             },
             create_user_login: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher"),
-                ],
+                "args": [KEY_CHOWN_USER],
+                "when": "pkgs_installed",
                 "result": "user_ok",
             },
+            create_group: {
+                "args": [f"?{KEY_USER_GROUPS}"],
+                "when": "user_ok",
+                "result": "group_created",
+            },
+            group_exists: {
+                "args": [f"?{KEY_USER_GROUPS}"],
+                "when": "user_ok",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [f"?{KEY_USERS}", f"?{KEY_USER_GROUPS}"],
+                "when": "group_exists",
+                "result": "needs_group",
+            },
             add_user_to_group: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_USERS, []),
-                    lambda j, m, c: m.get(KEY_USER_GROUPS, []),
-                ],
-                "result": "groups_added",
+                "args": [f"?{KEY_USERS}", f"?{KEY_USER_GROUPS}"],
+                "when": "needs_group",
             },
             make_dirs: {
                 "args": [KEY_SETUP_DIRS],
+                "when": "user_ok",
                 "result": "setup_dirs_ok",
             },
-            copy_file_dict: {
-                "args": [
-                    lambda j, m, c: (m.get(KEY_KIOSK_FILES, []) or []) + (m.get(KEY_SETTINGS_FILES, []) or []),
-                ],
-                "result": "files_copied",
+            "copy_kiosk_files": {
+                "fn": copy_file_dict,
+                "args": [KEY_KIOSK_FILES],
+                "when": "setup_dirs_ok",
+                "result": "kiosk_files_copied",
+            },
+            "copy_settings_files": {
+                "fn": copy_file_dict,
+                "args": [KEY_SETTINGS_FILES],
+                "when": "setup_dirs_ok",
+                "result": "settings_files_copied",
             },
             copy_folder_dict: {
                 "args": [KEY_SETTINGS_FOLDERS],
+                "when": ["kiosk_files_copied", "settings_files_copied"],
                 "result": "settings_folders_copied",
             },
         },
         "label": INSTALLED_LABEL,
-        "success_key": "installed",
+        "success_key": "settings_folders_copied",
         "post_state": "CONFIG_LOADING",
     },
-
     "UPDATE_SETTINGS": {
         "pipeline": {
-            create_user_login: {"args": [lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher")], "result": "user_ok"},
-            add_user_to_group: {"args": [lambda j, m, c: m.get(KEY_USERS, []), lambda j, m, c: m.get(KEY_USER_GROUPS, [])], "result": "groups_added"},
-            make_dirs:      {"args": [KEY_SETUP_DIRS], "result": "setup_dirs_ok"},
-            copy_file_dict: {"args": [KEY_SETTINGS_FILES], "result": "settings_files_copied"},
-            copy_folder_dict: {"args": [KEY_SETTINGS_FOLDERS], "result": "settings_folders_copied"},
+            create_user_login: {
+                "args": [KEY_CHOWN_USER],
+                "result": "user_ok",
+            },
+            create_group: {
+                "args": [KEY_USER_GROUPS],
+                "when": "user_ok",
+                "result": "group_created",
+            },
+            group_exists: {
+                "args": [KEY_USER_GROUPS],
+                "when": "group_created",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [KEY_USERS, KEY_USER_GROUPS],
+                "when": "group_exists",
+                "result": "needs_group",
+            },
+            add_user_to_group: {
+                "args": [KEY_USERS, KEY_USER_GROUPS],
+                "when": "needs_group",
+            },
+            make_dirs: {
+                "args": [KEY_SETUP_DIRS],
+                "when": "user_ok",
+                "result": "setup_dirs_ok",
+            },
+            copy_file_dict: {
+                "args": [KEY_SETTINGS_FILES],
+                "when": "setup_dirs_ok",
+                "result": "settings_files_copied",
+            },
+            copy_folder_dict: {
+                "args": [KEY_SETTINGS_FOLDERS],
+                "when": "setup_dirs_ok",
+                "result": "settings_folders_copied",
+            },
             chmod_paths: {
-                "args": [lambda j, m, c: (
-                    (m.get(KEY_SETTINGS_CHMOD_PATHS) or []) or
-                    ([{"path": f[KEY_DEST], "mode": "644"} for f in (m.get(KEY_SETTINGS_FILES, []) or [])] +
-                     [{"path": d[KEY_DEST], "mode": "755"} for d in (m.get(KEY_SETTINGS_FOLDERS, []) or [])])
-                )],
-                "result": "chmod_ok"
+                "args": [KEY_SETTINGS_CHMOD_PATHS],
+                "when": ["settings_files_copied", "settings_folders_copied"],
+                "result": "chmod_ok",
             },
             chown_paths: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher"),
-                    lambda j, m, c: (
-                        (m.get(KEY_SETTINGS_CHOWN_PATHS) or []) or
-                        ([{"path": f[KEY_DEST]} for f in (m.get(KEY_SETTINGS_FILES, []) or [])] +
-                         [{"path": d[KEY_DEST]} for d in (m.get(KEY_SETTINGS_FOLDERS, []) or [])])
-                    ),
-                    lambda j, m, c: True
-                ],
-                "result": "chown_ok"
+                "args": [KEY_CHOWN_USER, KEY_SETTINGS_CHOWN_PATHS, True],
+                "when": "chmod_ok",
+                "result": "chown_ok",
             },
         },
         "label": INSTALLED_LABEL,
-        "success_key": "settings_files_copied",
+        "success_key": "chown_ok",
         "post_state": "CONFIG_LOADING",
     },
-
     "RESET": {
         "pipeline": {
-            remove_paths: {"args": [KEY_REMOVE_PATHS], "result": "removed"},
-            make_dirs:    {"args": [KEY_SETUP_DIRS], "result": "reset_ok"},
+            remove_paths: {
+                "args": [KEY_REMOVE_PATHS],
+                "result": "removed",
+            },
+            make_dirs: {
+                "args": [KEY_SETUP_DIRS],
+                "when": "removed",
+                "result": "reset_ok",
+            },
         },
         "label": RESET_LABEL,
         "success_key": "reset_ok",
         "post_state": "CONFIG_LOADING",
     },
-
     "UNINSTALL": {
-    "pipeline": {
-         uninstall_packages: {
-            "args": ["job"],
-            "result": "uninstalled",
-        },
-        remove_paths: {"args": [KEY_REMOVE_PATHS], "result": "removed"},
-        set_default_display_manager: {
-            "args": [
-                lambda j, m, c: m[KEY_DEFAULT_DM]["package"],
-                lambda j, m, c: m[KEY_DEFAULT_DM]["service"],
-            ],
-            "result": "dm_set"
-        },
-        restart_service: {"args": [lambda j, m, c: m[KEY_DEFAULT_DM]["service"]], "result": "dm_on"},
-        make_dirs: {"args": [KEY_SETUP_DIRS], "result": "cleanup_ok"},
-    },
-    "label": UNINSTALLED_LABEL,
-    "success_key": "uninstalled",
-    "post_state": "CONFIG_LOADING",
-    },
-
-    "ENABLE_KIOSK": {
         "pipeline": {
-            create_user_login: {"args": [lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher")], "result": "user_ok"},
-            add_user_to_group: {"args": [lambda j, m, c: m.get(KEY_USERS, []), lambda j, m, c: m.get(KEY_USER_GROUPS, [])], "result": "groups_added"},
-            make_dirs:         {"args": [KEY_SETUP_DIRS],  "result": "setup_dirs_ok"},
-            copy_file_dict:    {"args": [lambda j, m, c: (m.get(KEY_KIOSK_FILES, []) or []) + (m.get(KEY_SETTINGS_FILES, []) or [])], "result": "files_copied"},
-            copy_folder_dict:  {"args": [KEY_SETTINGS_FOLDERS], "result": "settings_folders_copied"},
-            chmod_paths:       {"args": [KEY_CHMOD_PATHS], "result": "chmod_ok"},
-            chown_paths:       {"args": [lambda j, m, c: m.get(KEY_CHOWN_USER, "launcher"), KEY_CHOWN_PATHS, lambda j, m, c: bool(m.get(KEY_CHOWN_RECURSIVE, False))], "result": "chown_ok"},
-            set_default_display_manager: {"args": [
-                lambda j, m, c: m[KEY_KIOSK_DM]["package"],
-                lambda j, m, c: m[KEY_KIOSK_DM]["service"],
-            ], "result": "dm_set"},
-            restart_service: {"args": [lambda j, m, c: m[KEY_KIOSK_DM]["service"]], "result": "dm_on"},
+            uninstall_packages: {
+                "args": ["job"],
+                "result": "uninstalled",
+            },
+            remove_paths: {
+                "args": [KEY_REMOVE_PATHS],
+                "when": "uninstalled",
+                "result": "removed",
+            },
+            set_default_display_manager: {
+                "args": [KEY_DEFAULT_DM],
+                "when": "uninstalled",
+                "result": "dm_set",
+            },
+            restart_service: {
+                "args": [f"meta.{KEY_DEFAULT_DM}.service"],
+                "when": "dm_set",
+                "result": "dm_on",
+            },
+            make_dirs: {
+                "args": [KEY_SETUP_DIRS],
+                "when": "removed",
+                "result": "cleanup_ok",
+            },
         },
-        "label": "KIOSK",
-        "success_key":  "dm_on",
+        "label": UNINSTALLED_LABEL,
+        "success_key": "cleanup_ok",
         "post_state": "CONFIG_LOADING",
     },
-
-    "DISABLE_KIOSK": {
+    "ENABLE_KIOSK": {
         "pipeline": {
-            set_default_display_manager: {"args": [
-                lambda j,m,c: m[KEY_DEFAULT_DM]["package"],
-                lambda j,m,c: m[KEY_DEFAULT_DM]["service"],
-            ], "result": "dm_set"},
-            restart_service: {"args": [lambda j, m, c: m[KEY_DEFAULT_DM]["service"]], "result": "dm_on"},
+            create_user_login: {
+                "args": [KEY_CHOWN_USER],
+                "result": "user_ok",
+            },
+            create_group: {
+                "args": [KEY_USER_GROUPS],
+                "when": "user_ok",
+                "result": "group_created",
+            },
+            group_exists: {
+                "args": [KEY_USER_GROUPS],
+                "when": "group_created",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [KEY_USERS, KEY_USER_GROUPS],
+                "when": "group_exists",
+                "result": "needs_group",
+            },
+            add_user_to_group: {
+                "args": [KEY_USERS, KEY_USER_GROUPS],
+                "when": "needs_group",
+            },
+            make_dirs: {
+                "args": [KEY_SETUP_DIRS],
+                "when": "user_ok",
+                "result": "setup_dirs_ok",
+            },
+            "copy_kiosk_files": {
+                "fn": copy_file_dict,
+                "args": [KEY_KIOSK_FILES],
+                "when": "setup_dirs_ok",
+                "result": "kiosk_files_copied",
+            },
+            "copy_settings_files": {
+                "fn": copy_file_dict,
+                "args": [KEY_SETTINGS_FILES],
+                "when": "setup_dirs_ok",
+                "result": "settings_files_copied",
+            },
+            copy_folder_dict: {
+                "args": [KEY_SETTINGS_FOLDERS],
+                "when": ["kiosk_files_copied", "settings_files_copied"],
+                "result": "settings_folders_copied",
+            },
+            chmod_paths: {
+                "args": [KEY_CHMOD_PATHS],
+                "when": ["kiosk_files_copied", "settings_files_copied", "settings_folders_copied"],
+                "result": "chmod_ok",
+            },
+            chown_paths: {
+                "args": [KEY_CHOWN_USER, KEY_CHOWN_PATHS, KEY_CHOWN_RECURSIVE],
+                "when": "chmod_ok",
+                "result": "chown_ok",
+            },
+            set_default_display_manager: {
+                "args": [
+                    f"meta.{KEY_KIOSK_DM}.package",
+                    f"meta.{KEY_KIOSK_DM}.service",
+                ],
+                "when": "chown_ok",
+                "result": "dm_set",
+            },
+            restart_service: {
+                "args": [f"meta.{KEY_KIOSK_DM}.service"],
+                "when": "dm_set",
+                "result": "dm_on",
+            },
         },
         "label": "KIOSK",
         "success_key": "dm_on",
         "post_state": "CONFIG_LOADING",
     },
-
+    "DISABLE_KIOSK": {
+        "pipeline": {
+            set_default_display_manager: {
+                "args": [
+                    f"meta.{KEY_DEFAULT_DM}.package",
+                    f"meta.{KEY_DEFAULT_DM}.service",
+                ],
+                "result": "dm_set",
+            },
+            restart_service: {
+                "args": [f"meta.{KEY_DEFAULT_DM}.service"],
+                "when": "dm_set",
+                "result": "dm_on",
+            },
+        },
+        "label": "KIOSK",
+        "success_key": "dm_on",
+        "post_state": "CONFIG_LOADING",
+    },
     "SHOW_CONFIG_DOC": {
         "pipeline": {
             display_config_doc: {

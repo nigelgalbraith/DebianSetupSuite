@@ -1,0 +1,46 @@
+
+{
+  "FIXED_FIELDS": [
+    "<MODEL_ID>.Tests",
+    "<MODEL_ID>.Tests.<VALUES>.Tests",
+    "<MODEL_ID>.Tests.<VALUES>.Tests.<VALUES>.pipeline"
+  ],
+  "EDITABLE_FIELDS": [
+    "<MODEL_ID>",
+    "<MODEL_ID>.Tests.<VALUES>",
+    "<MODEL_ID>.Tests.<VALUES>.Tests.<VALUES>",
+    "<MODEL_ID>.Tests.<VALUES>.Tests.<VALUES>.pipeline.<VALUES>"
+  ],
+  "EXAMPLE": {
+    "<MODEL_ID>": {
+      "Tests": {
+        "constants/ArcadeConstants.py": {
+          "Tests": [
+            {
+              "pipeline": "INSTALL"
+            },
+            {
+              "pipeline": "UPDATE_SETTINGS"
+            },
+            {
+              "pipeline": "RESET"
+            },
+            {
+              "pipeline": "UNINSTALL"
+            },
+            {
+              "pipeline": "SHOW_CONFIG_DOC"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "DESCRIPTION": {
+    "<MODEL_ID>.Tests": "Collection of constants files to test.",
+    "<MODEL_ID>.Tests.<VALUES>": "Path to the constants file being tested.",
+    "<MODEL_ID>.Tests.<VALUES>.Tests": "List of pipelines to test.",
+    "<MODEL_ID>.Tests.<VALUES>.Tests.<VALUES>": "An individual pipeline test definition.",
+    "<MODEL_ID>.Tests.<VALUES>.Tests.<VALUES>.pipeline.<VALUES>": "Name of the pipeline to validate against PIPELINE_STATES."
+  }
+}

@@ -121,6 +121,7 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
@@ -131,18 +132,18 @@ PIPELINE_STATES = {
             },
             install_binary: {
                 "args": ["binary_path", KEY_INSTALL_PATH],
+                "when": "binary_path",
                 "result": "installed",
             },
             run_commands: {
                 "args": [KEY_POST_INSTALL],
-
+                "when": "installed",
             },
         },
         "label": INSTALLED_LABEL,
         "success_key": "installed",
         "post_state": "CONFIG_LOADING",
     },
-
     "UNINSTALL": {
         "pipeline": {
             uninstall_binary: {
@@ -151,14 +152,13 @@ PIPELINE_STATES = {
             },
             run_commands: {
                 "args": [KEY_POST_UNINSTALL],
-
+                "when": "uninstalled",
             },
         },
         "label": UNINSTALLED_LABEL,
         "success_key": "uninstalled",
         "post_state": "CONFIG_LOADING",
     },
-
     "SHOW_CONFIG_DOC": {
         "pipeline": {
             display_config_doc: {

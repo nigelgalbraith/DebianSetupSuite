@@ -60,6 +60,21 @@ def docker_image_doesnt_exist(image_name: str) -> bool:
         return False
 
 
+def docker_image_exists(image_name: str) -> bool:
+    """Return True if the Docker image exists locally."""
+    try:
+        result = subprocess.run(
+            ["docker", "images", "-q", image_name],
+            capture_output=True, text=True, check=False
+        )
+        exists = result.returncode == 0 and bool(result.stdout.strip())
+        print(f"[CHECK] Image '{image_name}': {'present' if exists else 'absent'}")
+        return exists
+    except Exception as e:
+        print(f"[ERROR] Could not check image '{image_name}': {e}")
+        return False
+
+
 def docker_container_running(name: str) -> bool:
     """Return True if the Docker container `name` is currently running."""
     try:

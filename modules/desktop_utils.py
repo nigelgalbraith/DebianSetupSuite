@@ -72,21 +72,29 @@ def remove_desktop_entry(name: str, user: str = "") -> bool:
         return False
 
 
+
 def refresh_desktop_database() -> bool:
     """Refresh desktop launcher/icon caches."""
-    try:
-        commands = [
-            ["update-desktop-database", "/usr/share/applications"],
-        ]
-        if shutil.which("kbuildsycoca6"):
-            commands.append(["kbuildsycoca6"])
-        elif shutil.which("kbuildsycoca5"):
-            commands.append(["kbuildsycoca5"])
-        for cmd in commands:
-            print(f"[INFO] Running: {' '.join(cmd)}")
-            subprocess.run(cmd, check=False)
+    commands = [["update-desktop-database", "/usr/share/applications"]]
+    if shutil.which("kbuildsycoca6"):
+        commands.append(["kbuildsycoca6"])
+    elif shutil.which("kbuildsycoca5"):
+        commands.append(["kbuildsycoca5"])
+    success = True
+    for cmd in commands:
+        print(f"[INFO] Running: {' '.join(cmd)}")
+        try:
+            result = subprocess.run(cmd, check=False)
+            if result.returncode == 0:
+                print(f"[OK] Command completed: {cmd[0]}")
+            else:
+                print(f"[WARNING] {cmd[0]} exited with code {result.returncode}")
+                success = False
+        except OSError as e:
+            print(f"[ERROR] Could not run {cmd[0]}: {e}")
+            success = False
+    if success:
         print("[OK] Desktop cache refresh complete")
-        return True
-    except Exception as e:
-        print(f"[ERROR] Failed to refresh desktop database: {e}")
-        return False
+    else:
+        print("[WARNING] Desktop cache refresh completed with errors")
+    return success

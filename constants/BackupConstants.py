@@ -12,7 +12,7 @@ DEFAULT_CONFIG = "Default"
 CONFIG_DOC     = "doc/BackupDoc.json"
 
 # === JSON KEYS ===
-KEY_SOURCE_FOLDERS          = "CopyFolders"
+KEY_BACKUP_FOLDERS          = "CopyFolders"
 KEY_COPY_FOLDERS_EXCLUDE    = "CopyFoldersExclude"
 KEY_SOURCE_FILES            = "CopyFiles"
 KEY_ZIP_ARCHIVES            = "ZipArchives"
@@ -29,7 +29,7 @@ SUBKEY_OUTPUT       = "output"
 # === VALIDATION CONFIG ===
 VALIDATION_CONFIG = {
     "required_job_fields": {
-        KEY_SOURCE_FOLDERS: list,
+        KEY_BACKUP_FOLDERS: list,
         KEY_SOURCE_FILES: list,
         KEY_ZIP_ARCHIVES: list,
         KEY_CHECK_PATH: str,
@@ -39,7 +39,7 @@ VALIDATION_CONFIG = {
 
 # === SECONDARY VALIDATION ===
 SECONDARY_VALIDATION = {
-    KEY_SOURCE_FOLDERS: {
+    KEY_BACKUP_FOLDERS: {
         "required_job_fields": {
             SUBKEY_COPY_NAME: str,
             SUBKEY_SRC: str,
@@ -92,7 +92,7 @@ UNINSTALLED_LABEL = "TARGET EMPTY"
 # === STATUS FUNCTION CONFIG ===
 STATUS_FN_CONFIG = {
     "fn": check_folder_path,
-    "args": [lambda j, m, c: m.get(KEY_CHECK_PATH)],
+    "args": [KEY_CHECK_PATH],
     "labels": {True: INSTALLED_LABEL, False: UNINSTALLED_LABEL},
 }
 
@@ -165,26 +165,25 @@ SUB_MENU = {
 
 # === PLANNING COLUMNS ===
 PLAN_COLUMN_ORDER = [
-    KEY_SOURCE_FOLDERS,
+    KEY_BACKUP_FOLDERS,
     KEY_SOURCE_FILES,
     KEY_ZIP_ARCHIVES,
 ]
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINE STATES ===
 PIPELINE_STATES = {
     "COPY_FOLDERS": {
         "pipeline": {
-         make_dirs: {
-                "args": [lambda j, m, c: [f["dest"] for f in m.get(KEY_SOURCE_FOLDERS, [])]],
+            make_dirs: {
+                "args": [KEY_BACKUP_FOLDERS],
                 "result": "dirs_ready",
             },
             copy_folder_dict: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_SOURCE_FOLDERS, []),
-                    lambda j, m, c: m.get(KEY_COPY_FOLDERS_EXCLUDE, []),
-                ],
+                "args": [KEY_BACKUP_FOLDERS, KEY_COPY_FOLDERS_EXCLUDE],
+                "when": "dirs_ready",
                 "result": "folders_copied",
             },
         },
@@ -206,7 +205,7 @@ PIPELINE_STATES = {
     "CREATE_ZIP": {
         "pipeline": {
             create_zip_archive: {
-                "args": [lambda j, m, c: [(z["src"], z["output"]) for z in m.get(KEY_ZIP_ARCHIVES, [])]],
+                "args": [KEY_ZIP_ARCHIVES],
                 "result": "archives_created",
             },
         },
@@ -217,22 +216,21 @@ PIPELINE_STATES = {
     "ALL_TASKS": {
         "pipeline": {
             make_dirs: {
-                "args": [lambda j, m, c: [f["dest"] for f in m.get(KEY_SOURCE_FOLDERS, [])]],
+                "args": [KEY_BACKUP_FOLDERS],
                 "result": "dirs_ready",
             },
             copy_folder_dict: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_SOURCE_FOLDERS, []),
-                    lambda j, m, c: m.get(KEY_COPY_FOLDERS_EXCLUDE, []),
-                ],
+                "args": [KEY_BACKUP_FOLDERS, KEY_COPY_FOLDERS_EXCLUDE],
+                "when": "dirs_ready",
                 "result": "folders_copied",
             },
             copy_file_dict: {
                 "args": [KEY_SOURCE_FILES],
+                "when": "folders_copied",
                 "result": "files_copied",
             },
             create_zip_archive: {
-                "args": [lambda j, m, c: [(z["src"], z["output"]) for z in m.get(KEY_ZIP_ARCHIVES, [])]],
+                "args": [KEY_ZIP_ARCHIVES],
                 "result": "archives_created",
             },
         },

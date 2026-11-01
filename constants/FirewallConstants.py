@@ -194,32 +194,52 @@ DEPENDENCIES = ["ufw"]
 PLAN_COLUMN_ORDER = [KEY_APPLICATIONS, KEY_SINGLE_PORTS, KEY_PORT_RANGES]
 OPTIONAL_PLAN_COLUMNS = {}
 
+
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "APPLY_RULES": {
         "pipeline": {
-            reset_ufw:          {"args": [], "result": "_"},
-            enable_ufw:         {"args": [], "result": "_"},
-            enable_logging_ufw: {"args": [], "result": "_"},
+            reset_ufw: {
+                "args": [],
+                "result": "reset",
+            },
+            enable_ufw: {
+                "args": [],
+                "when": "reset",
+                "result": "enabled",
+            },
+            enable_logging_ufw: {
+                "args": [],
+                "when": "enabled",
+                "result": "logging_enabled",
+            },
             allow_application: {
-                "args": [f"meta.{KEY_APPLICATIONS}"],
-                "result": "_",
-                "when": f"meta.{KEY_APPLICATIONS}",
+                "args": [KEY_APPLICATIONS],
+                "when": ["logging_enabled", f"meta.{KEY_APPLICATIONS}"],
             },
             apply_singleports: {
-                "args": [f"meta.{KEY_SINGLE_PORTS}"],
-                "result": "_",
-                "when":  f"meta.{KEY_SINGLE_PORTS}",
+                "args": [KEY_SINGLE_PORTS],
+                "when": ["logging_enabled", f"meta.{KEY_SINGLE_PORTS}"],
             },
-
             apply_portranges: {
-                "args": [f"meta.{KEY_PORT_RANGES}"],
-                "result": "_",
-                "when":  f"meta.{KEY_PORT_RANGES}",
+                "args": [KEY_PORT_RANGES],
+                "when": ["logging_enabled", f"meta.{KEY_PORT_RANGES}"],
             },
-            reload_ufw:         {"args": [], "result": "_"},
-            status_ufw:         {"args": [], "result": "ok"},
-            status_ufw_display: {"args": [], "result": "ok"},
+            reload_ufw: {
+                "args": [],
+                "when": "logging_enabled",
+                "result": "reloaded",
+            },
+            status_ufw: {
+                "args": [],
+                "when": "reloaded",
+                "result": "ok",
+            },
+            status_ufw_display: {
+                "args": [],
+                "when": "ok",
+            },
         },
         "label": INSTALLED_LABEL,
         "success_key": "ok",
@@ -227,7 +247,10 @@ PIPELINE_STATES = {
     },
     "STATUS_ONLY": {
         "pipeline": {
-            status_ufw_display: {"args": [], "result": "ok"},
+            status_ufw_display: {
+                "args": [],
+                "result": "ok",
+            },
         },
         "label": "STATUS",
         "success_key": "ok",
@@ -235,9 +258,19 @@ PIPELINE_STATES = {
     },
     "ENABLE_ONLY": {
         "pipeline": {
-            enable_ufw:         {"args": [], "result": "ok"},
-            enable_logging_ufw: {"args": [], "result": "_"},
-            status_ufw:         {"args": [], "result": "_"},
+            enable_ufw: {
+                "args": [],
+                "result": "enabled",
+            },
+            enable_logging_ufw: {
+                "args": [],
+                "when": "enabled",
+            },
+            status_ufw: {
+                "args": [],
+                "when": "enabled",
+                "result": "ok",
+            },
         },
         "label": INSTALLED_LABEL,
         "success_key": "ok",
@@ -245,8 +278,15 @@ PIPELINE_STATES = {
     },
     "DISABLE_ONLY": {
         "pipeline": {
-            disable_ufw: {"args": [], "result": "ok"},
-            status_ufw:  {"args": [], "result": "_"},
+            disable_ufw: {
+                "args": [],
+                "result": "disabled",
+            },
+            status_ufw: {
+                "args": [],
+                "when": "disabled",
+                "result": "ok",
+            },
         },
         "label": UNINSTALLED_LABEL,
         "success_key": "ok",
@@ -254,8 +294,15 @@ PIPELINE_STATES = {
     },
     "RESET_ONLY": {
         "pipeline": {
-            reset_ufw:  {"args": [], "result": "ok"},
-            status_ufw: {"args": [], "result": "_"},
+            reset_ufw: {
+                "args": [],
+                "result": "reset",
+            },
+            status_ufw: {
+                "args": [],
+                "when": "reset",
+                "result": "ok",
+            },
         },
         "label": "RESET",
         "success_key": "ok",

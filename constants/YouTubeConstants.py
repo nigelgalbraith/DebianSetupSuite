@@ -61,9 +61,7 @@ COMPLETE_LABEL    = "DOWNLOAD COMPLETE"
 # === STATUS FUNCTION CONFIG ===
 STATUS_FN_CONFIG = {
     "fn": check_folder_path,
-    "args": [
-        lambda j, m, c: m.get(KEY_DOWNLOAD_PATH),
-    ],
+    "args": [KEY_DOWNLOAD_PATH],
     "labels": {
         True: INSTALLED_LABEL,
         False: UNINSTALLED_LABEL,
@@ -136,15 +134,13 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINE STATES ===
 PIPELINE_STATES = {
     "OPEN_YOUTUBE": {
         "pipeline": {
             open_browser: {
-                "args": [
-                    BROWSER,
-                    YOUTUBE_URL,
-                ],
+                "args": [BROWSER, YOUTUBE_URL],
                 "result": "browser_opened",
             },
         },
@@ -152,14 +148,13 @@ PIPELINE_STATES = {
         "success_key": "browser_opened",
         "post_state": "CONFIG_LOADING",
     },
-
     "DOWNLOAD_PLAYLIST": {
         "pipeline": {
             run_yt_dlp: {
                 "args": [
-                    lambda job, meta, ctx: meta[KEY_PLAYLIST_URL],
-                    lambda job, meta, ctx: meta[KEY_DOWNLOAD_PATH],
-                    lambda job, meta, ctx: meta[KEY_FORMAT],
+                    KEY_PLAYLIST_URL,
+                    KEY_DOWNLOAD_PATH,
+                    KEY_FORMAT,
                     BROWSER,
                 ],
                 "result": "complete",
@@ -169,7 +164,6 @@ PIPELINE_STATES = {
         "success_key": "complete",
         "post_state": "CONFIG_LOADING",
     },
-
     "SHOW_CONFIG_DOC": {
         "pipeline": {
             display_config_doc: {

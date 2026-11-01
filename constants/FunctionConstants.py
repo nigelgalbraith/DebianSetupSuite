@@ -139,6 +139,7 @@ OPTIONAL_PLAN_COLUMNS = {
     f"Show {JOBS_KEY}": PLAN_COLUMNS_SHOW,
 }
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "ANALYZE": {
@@ -149,19 +150,21 @@ PIPELINE_STATES = {
             },
             scan_function_usage: {
                 "args": ["module_functions", KEY_CHECK_FOLDERS, KEY_CHECK_FILES, KEY_MODULE_FOLDER],
+                "when": "module_functions",
                 "result": "scan_result",
             },
             print_usage_summary: {
                 "args": ["job", "scan_result"],
+                "when": "scan_result",
             },
             detect_usage: {
                 "args": ["scan_result"],
+                "when": "scan_result",
                 "result": "used",
             },
         },
         "success_key": "used",
     },
-
     "SHOW_FUNCTIONS": {
         "pipeline": {
             load_module_function_docs: {
@@ -170,13 +173,13 @@ PIPELINE_STATES = {
             },
             print_functions_summary: {
                 "args": ["job", "fn_docs"],
+                "when": "fn_docs",
                 "result": "ok",
             },
         },
         "success_key": "ok",
     },
-    
-     "SHOW_CONFIG_DOC": {
+    "SHOW_CONFIG_DOC": {
         "pipeline": {
             display_config_doc: {
                 "args": [CONFIG_DOC],
@@ -188,3 +191,4 @@ PIPELINE_STATES = {
         "post_state": "CONFIG_LOADING",
     },
 }
+

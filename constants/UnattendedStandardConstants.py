@@ -118,14 +118,13 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINE STATES ===
 PIPELINE_STATES = {
     "RUN_UNATTENDED": {
         "pipeline": {
             execute_loader_job: {
-                "args": [
-                    lambda job, meta, ctx: meta,
-                ],
+                "args": ["meta"],
                 "result": "complete",
             },
         },

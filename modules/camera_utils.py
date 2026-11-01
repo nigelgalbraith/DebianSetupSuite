@@ -9,34 +9,26 @@ from pathlib import Path
 import subprocess
 import os
 
+from modules.system_utils import expand_path
+
 # ---------------------------------------------------------------------
 # HELPERS
 # ---------------------------------------------------------------------
 
 
-def find_extracted_binary(root: Path, binary_name: str) -> Path | None:
-    """
-    Search an extracted directory tree for a target binary.
 
-    First attempts an exact name match via rglob(binary_name); if not found, falls back
-    to a case-insensitive prefix match (useful for version-suffixed binaries).
-
-    Example:
-        bin_path = find_extracted_binary(Path("/tmp/extract"), "ffmpeg")
-    """
-    candidate = None
-    found = False
+def find_extracted_binary(root: Path | str, binary_name: str) -> Path | None:
+    """Search an extracted directory for a binary by exact name or case-insensitive prefix."""
+    root = Path(expand_path(root))
     for p in root.rglob(binary_name):
-        if (not found) and p.is_file():
-            candidate = p
-            found = True
-    if not found:
-        lower_prefix = binary_name.lower()
-        for p in root.rglob("*"):
-            if (not found) and p.is_file() and p.name.lower().startswith(lower_prefix):
-                candidate = p
-                found = True
-    return candidate
+        if p.is_file():
+            return p
+    lower_prefix = binary_name.lower()
+    for p in root.rglob("*"):
+        if p.is_file() and p.name.lower().startswith(lower_prefix):
+            return p
+    return None
+
 
 # ---------------------------------------------------------------------
 # FILE GENERATORS
@@ -107,17 +99,11 @@ def remove_m3u(m3u_path: Path) -> bool:
         return False
 
 
-def ensure_dummy_xmltv(path: Path, cameras: list[dict]) -> None:
-    """
-    Ensure an XMLTV file exists with one <channel> entry per camera.
 
-    Creates the file only if it does not already exist; channel display names use
-    camera "Name" plus optional "Description".
-
-    Example:
-        ensure_dummy_xmltv(Path("/var/lib/tvheadend/xmltv.xml"), cameras)
-    """
+def ensure_dummy_xmltv(path: Path | str, cameras: list[dict]) -> bool:
+    """Ensure an XMLTV file exists with one channel per camera."""
     try:
+        path = Path(expand_path(path))
         path.parent.mkdir(parents=True, exist_ok=True)
         if not path.exists():
             header = '<?xml version="1.0" encoding="UTF-8"?>\n<tv>\n'
@@ -138,5 +124,8 @@ def ensure_dummy_xmltv(path: Path, cameras: list[dict]) -> None:
             print(f"Created dummy XMLTV with {len(cameras)} channels → {path}")
         else:
             print(f"XMLTV already exists at: {path}")
+        return True
     except Exception as e:
         print(f"WARNING: Could not create dummy XMLTV file: {e}")
+        return False
+

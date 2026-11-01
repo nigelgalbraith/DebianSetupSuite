@@ -140,36 +140,39 @@ OPTIONAL_PLAN_COLUMNS = {
     "Apply DHCP Networks": PLAN_COLUMNS_DHCP,
 }
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
         "pipeline": {
             ensure_static_connection: {
-                "args": [lambda j, m, c: m, "job"],
+                "args": ["meta", "job"],
                 "result": "applied",
             },
             bring_up_connection: {
                 "args": [KEY_CONN_NAME],
+                "when": "applied",
                 "result": "brought_up",
             },
         },
         "label": INSTALLED_LABEL,
-        "success_key": "applied",
+        "success_key": "brought_up",
         "post_state": "CONFIG_LOADING",
     },
     "UNINSTALL": {
         "pipeline": {
             ensure_dhcp_connection: {
-                "args": [lambda j, m, c: m, "job"],
+                "args": ["meta", "job"],
                 "result": "applied",
             },
             bring_up_connection: {
                 "args": [KEY_CONN_NAME],
+                "when": "applied",
                 "result": "brought_up",
             },
         },
         "label": UNINSTALLED_LABEL,
-        "success_key": "applied",
+        "success_key": "brought_up",
         "post_state": "CONFIG_LOADING",
     },
     "SHOW_CONFIG_DOC": {
@@ -184,3 +187,4 @@ PIPELINE_STATES = {
         "post_state": "CONFIG_LOADING",
     },
 }
+

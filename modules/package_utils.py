@@ -73,6 +73,20 @@ def ensure_dependencies_installed(dependencies):
 # APT INSTALL / UNINSTALL
 # ---------------------------------------------------------------------
 
+def get_packages(*sources) -> list:
+    """Collect package names from dictionaries and lists."""
+    packages = []
+    for source in sources:
+        if isinstance(source, dict):
+            package = source["package"]
+            print(f"[get_packages] Found package: {package}")
+            packages.append(package)
+        elif isinstance(source, list):
+            print(f"[get_packages] Found additional packages: {source}")
+            packages.extend(source)
+    print(f"[get_packages] Packages collected: {packages}")
+    return packages
+
 
 def install_packages(packages: Union[str, List[str]]) -> bool:
     """
@@ -132,15 +146,16 @@ def download_deb_file(pkg: str, url: str, download_dir: str | Path, filename: Op
 
 
 def install_deb_file(deb_file, name):
-    """
-    Install a .deb using dpkg, resolving dependencies via apt-get if needed.
-
-    Example:
-        install_deb_file(Path("/tmp/google-chrome.deb"), "Chrome")
-    """
+    """Install a .deb file using dpkg, resolving dependencies if needed."""
+    deb_file = Path(deb_file)
+    if deb_file.is_dir():
+        deb_file = deb_file / f"{name}.deb"
+    if not deb_file.is_file():
+        print(f"[install_deb_file] ERROR: DEB file not found: {deb_file}")
+        return False
     if subprocess.run(["sudo", "dpkg", "-i", str(deb_file)]).returncode != 0:
         subprocess.run(["sudo", "apt-get", "install", "-f", "-y"], check=True)
         if subprocess.run(["sudo", "dpkg", "-i", str(deb_file)]).returncode != 0:
-            print(f"Retry install failed for {name}")
+            print(f"[install_deb_file] ERROR: Retry install failed for {name}")
             return False
     return True

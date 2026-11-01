@@ -151,6 +151,7 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
@@ -162,12 +163,12 @@ PIPELINE_STATES = {
             "copy_files": {
                 "fn": copy_files,
                 "args": [f"meta.{KEY_OPTIONAL_FILES}"],
-                "result": "files_copied",
+                "when": "script_copied",
             },
             "copy_folders": {
                 "fn": copy_folders,
                 "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
-                "result": "folders_copied",
+                "when": "script_copied",
             },
             install_autostart: {
                 "args": [
@@ -175,6 +176,7 @@ PIPELINE_STATES = {
                     f"meta.{KEY_AUTOSTART_NAME}",
                     f"meta.{KEY_USERS}",
                 ],
+                "when": "script_copied",
                 "result": "ok",
             },
         },
@@ -195,23 +197,20 @@ PIPELINE_STATES = {
                 "fn": remove_file,
                 "args": [f"meta.{KEY_SCRIPT_DEST}"],
                 "when": "removed_autostart",
-                "result": "removed_script",
             },
             "remove_files": {
                 "fn": remove_files,
                 "args": [f"meta.{KEY_OPTIONAL_FILES}"],
-                "when": "removed_script",
-                "result": "removed_files",
+                "when": "removed_autostart",
             },
             "remove_folders": {
                 "fn": remove_folders,
                 "args": [f"meta.{KEY_OPTIONAL_FOLDERS}"],
-                "when": "removed_files",
-                "result": "ok",
+                "when": "removed_autostart",
             },
         },
         "label": UNINSTALLED_LABEL,
-        "success_key": "ok",
+        "success_key": "removed_autostart",
         "post_state": "CONFIG_LOADING",
     },
     "RUN": {

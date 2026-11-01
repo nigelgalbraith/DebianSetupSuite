@@ -103,17 +103,17 @@ UNINSTALLED_LABEL = "INCOMPLETE"
 
 
 # ==================================================
-# STATUS CHECK CONFIG (UNIFIED)
+# STATUS CHECK CONFIG 
 # ==================================================
 
 STATUS_FN_CONFIG = {
     "fn": is_job_incomplete,
-    "args": [lambda j, m, c: m],
+    "args": ["meta"],
     "labels": {True: UNINSTALLED_LABEL, False: INSTALLED_LABEL},
 }
 
 # ==================================================
-# COLUMN ORDER (UNIFIED)
+# COLUMN ORDER 
 # ==================================================
 
 PLAN_COLUMN_ORDER = [
@@ -189,24 +189,20 @@ SUB_MENU: Dict[str, str] = {
 DEPENDENCIES: List[str] = ["wget", "unzip", "p7zip-full"]
 
 
-# ==================================================
-# PIPELINES (UNIFIED)
-# ==================================================
-# New flow:
-#   - filter_downloads(job_meta) handles planning
-#   - run_link_jobs(filtered) handles execution
-# ==================================================
 
+# ==================================================
+# PIPELINES
+# ==================================================
 PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
-
     "DOWNLOAD_MISSING": {
         "pipeline": {
             filter_downloads: {
-                "args": [lambda j, m, c: m],
+                "args": ["meta"],
                 "result": "filtered",
             },
             run_link_jobs: {
                 "args": ["filtered"],
+                "when": "filtered",
                 "result": "links_ok",
             },
         },
@@ -214,7 +210,6 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
         "success_key": "links_ok",
         "post_state": "CONFIG_LOADING",
     },
-
     "LINKS_TO_JSON": {
         "pipeline": {
             run_script_dict: {
@@ -231,7 +226,6 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
         "success_key": "json_ok",
         "post_state": "CONFIG_LOADING",
     },
-
     "SHOW_CONFIG_DOC": {
         "pipeline": {
             display_config_doc: {
@@ -244,3 +238,4 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
         "post_state": "CONFIG_LOADING",
     },
 }
+

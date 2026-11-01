@@ -15,9 +15,16 @@ from modules.system_utils import (
     add_user_to_group,
     remove_paths,
     protect_folders,
+    group_exists,
+    user_not_in_group,
 )
-from modules.package_utils import check_package, install_packages, uninstall_packages
-from modules.display_utils import display_config_doc
+from modules.package_utils import (
+    check_package, install_packages, 
+    uninstall_packages,
+)
+from modules.display_utils import (
+    display_config_doc
+)
 
 # === CONFIG PATHS & KEYS ===
 PRIMARY_CONFIG   = "config/AppConfigSettings.json"
@@ -244,35 +251,66 @@ DEPENDENCIES = []
 PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
     "INSTALL": {
         "pipeline": {
-            install_packages: { "args": [KEY_PACKAGES], "result": "installed" },
-            make_dirs:        { "args": [KEY_SETUP_DIRS], "result": "setup_dirs_ok" },
-            run_script_dict:  { "args": [KEY_SETUP_SCRIPTS], "result": "setup_scripts_ok" },
-            run_commands:     { "args": [KEY_SETUP_CMDS], "result": "setup_ok" },
-            copy_file_dict:   { "args": [KEY_SETTINGS_FILES], "result": "settings_files_copied" },
-            copy_folder_dict: { "args": [KEY_SETTINGS_FOLDERS], "result": "settings_folders_copied" },
-
+            install_packages: {
+                "args": [KEY_PACKAGES],
+                "result": "installed",
+            },
+            make_dirs: {
+                "args": [KEY_SETUP_DIRS],
+                "when": "installed",
+            },
+            run_script_dict: {
+                "args": [KEY_SETUP_SCRIPTS],
+                "when": "installed",
+            },
+            run_commands: {
+                "args": [KEY_SETUP_CMDS],
+                "when": "installed",
+                "result": "setup_ok",
+            },
+            copy_file_dict: {
+                "args": [KEY_SETTINGS_FILES],
+                "when": "installed",
+            },
+            copy_folder_dict: {
+                "args": [KEY_SETTINGS_FOLDERS],
+                "when": "installed",
+            },
             create_group: {
-                    "args": [lambda j, m, c: m.get(KEY_ARCADE_GROUPS)],
-                    "result": "groups_ok"
-                },
+                "args": [KEY_ARCADE_GROUPS],
+                "when": "installed",
+            },
+            group_exists: {
+                "args": [KEY_ARCADE_GROUPS],
+                "when": "installed",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [KEY_ARCADE_USERS, KEY_ARCADE_GROUPS],
+                "when": "group_exists",
+                "result": "user_needs_group",
+            },
             add_user_to_group: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_ARCADE_USERS),
-                    lambda j, m, c: m.get(KEY_ARCADE_GROUPS)
-                ],
-                "result": "arcade_groups_added"
+                "args": [KEY_ARCADE_USERS, KEY_ARCADE_GROUPS],
+                "when": "user_needs_group",
             },
             chown_paths: {
                 "args": [
-                    lambda j, m, c: m.get(KEY_CHOWN_USER),
+                    KEY_CHOWN_USER,
                     KEY_CHOWN_PATHS,
-                    lambda j, m, c: bool(m.get(KEY_CHOWN_RECURSIVE)),
-                    lambda j, m, c: m.get(KEY_CHOWN_GROUP)
+                    KEY_CHOWN_RECURSIVE,
+                    KEY_CHOWN_GROUP,
                 ],
-                "result": "chown_ok"
+                "when": "installed",
             },
-            chmod_paths:      { "args": [KEY_CHMOD_PATHS], "result": "chmod_ok" },
-            protect_folders: { "args": [KEY_PROTECTED_FOLDERS], "result": "protected_ok" },
+            chmod_paths: {
+                "args": [KEY_CHMOD_PATHS],
+                "when": "installed",
+            },
+            protect_folders: {
+                "args": [KEY_PROTECTED_FOLDERS],
+                "when": "installed",
+            },
         },
         "label": INSTALLED_LABEL,
         "success_key": "setup_ok",
@@ -281,34 +319,62 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
 
     "UPDATE_SETTINGS": {
         "pipeline": {
-            remove_paths:     { "args": [KEY_REMOVE_PATHS], "result": "removed" },
-            run_script_dict:  { "args": [KEY_SETUP_SCRIPTS], "result": "setup_scripts_ok" },
-            run_commands:     { "args": [KEY_SETUP_CMDS], "result": "setup_ok" },
-            copy_file_dict:   { "args": [KEY_SETTINGS_FILES], "result": "settings_files_copied" },
-            copy_folder_dict: { "args": [KEY_SETTINGS_FOLDERS], "result": "settings_folders_copied" },
-
+            remove_paths: {
+                "args": [KEY_REMOVE_PATHS],
+                "result": "removed",
+            },
+            run_script_dict: {
+                "args": [KEY_SETUP_SCRIPTS],
+                "when": "removed",
+            },
+            run_commands: {
+                "args": [KEY_SETUP_CMDS],
+                "when": "removed",
+                "result": "setup_ok",
+            },
+            copy_file_dict: {
+                "args": [KEY_SETTINGS_FILES],
+                "when": "removed",
+            },
+            copy_folder_dict: {
+                "args": [KEY_SETTINGS_FOLDERS],
+                "when": "removed",
+            },
             create_group: {
-                "args": [lambda j, m, c: m.get(KEY_ARCADE_GROUPS)],
-                "result": "groups_ok"
+                "args": [KEY_ARCADE_GROUPS],
+                "when": "removed",
+            },
+            group_exists: {
+                "args": [KEY_ARCADE_GROUPS],
+                "when": "removed",
+                "result": "group_exists",
+            },
+            user_not_in_group: {
+                "args": [KEY_ARCADE_USERS, KEY_ARCADE_GROUPS],
+                "when": "group_exists",
+                "result": "user_needs_group",
             },
             add_user_to_group: {
-                "args": [
-                    lambda j, m, c: m.get(KEY_ARCADE_USERS),
-                    lambda j, m, c: m.get(KEY_ARCADE_GROUPS)
-                ],
-                "result": "arcade_groups_added"
+                "args": [KEY_ARCADE_USERS, KEY_ARCADE_GROUPS],
+                "when": "user_needs_group",
             },
             chown_paths: {
                 "args": [
-                    lambda j, m, c: m.get(KEY_CHOWN_USER),
+                    KEY_CHOWN_USER,
                     KEY_CHOWN_PATHS,
-                    lambda j, m, c: bool(m.get(KEY_CHOWN_RECURSIVE)),
-                    lambda j, m, c: m.get(KEY_CHOWN_GROUP)
+                    KEY_CHOWN_RECURSIVE,
+                    KEY_CHOWN_GROUP,
                 ],
-                "result": "chown_ok"
+                "when": "removed",
             },
-            chmod_paths:      { "args": [KEY_CHMOD_PATHS], "result": "chmod_ok" },
-            protect_folders: { "args": [KEY_PROTECTED_FOLDERS], "result": "protected_ok" },
+            chmod_paths: {
+                "args": [KEY_CHMOD_PATHS],
+                "when": "removed",
+            },
+            protect_folders: {
+                "args": [KEY_PROTECTED_FOLDERS],
+                "when": "removed",
+            },
         },
         "label": INSTALLED_LABEL,
         "success_key": "setup_ok",
@@ -317,9 +383,20 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
 
     "RESET": {
         "pipeline": {
-            remove_paths: { "args": [KEY_REMOVE_PATHS], "result": "removed" },
-            make_dirs:    { "args": [KEY_RESET_DIRS], "result": "reset_dirs_ok" },
-            run_commands: { "args": [KEY_RESET_CMDS], "result": "reset_ok" },
+            remove_paths: {
+                "args": [KEY_REMOVE_PATHS],
+                "result": "removed",
+            },
+            make_dirs: {
+                "args": [KEY_RESET_DIRS],
+                "when": "removed",
+                "result": "dirs_created",
+            },
+            run_commands: {
+                "args": [KEY_RESET_CMDS],
+                "when": "dirs_created",
+                "result": "reset_ok",
+            },
         },
         "label": RESET_LABEL,
         "success_key": "reset_ok",
@@ -328,10 +405,25 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
 
     "UNINSTALL": {
         "pipeline": {
-            run_commands:       { "args": [KEY_RESET_CMDS], "result": "reset_ok" },
-            remove_paths:       { "args": [KEY_REMOVE_PATHS], "result": "removed" },
-            make_dirs:          { "args": [KEY_RESET_DIRS], "result": "cleanup_ok" },
-            uninstall_packages: { "args": [KEY_PACKAGES], "result": "uninstalled" },
+            run_commands: {
+                "args": [KEY_RESET_CMDS],
+                "result": "reset_ok",
+            },
+            remove_paths: {
+                "args": [KEY_REMOVE_PATHS],
+                "when": "reset_ok",
+                "result": "removed",
+            },
+            make_dirs: {
+                "args": [KEY_RESET_DIRS],
+                "when": "removed",
+                "result": "cleanup_ok",
+            },
+            uninstall_packages: {
+                "args": [KEY_PACKAGES],
+                "when": "cleanup_ok",
+                "result": "uninstalled",
+            },
         },
         "label": UNINSTALLED_LABEL,
         "success_key": "uninstalled",

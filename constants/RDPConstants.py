@@ -157,6 +157,7 @@ PLAN_COLUMN_ORDER = [
 
 OPTIONAL_PLAN_COLUMNS = {}
 
+
 # === PIPELINES ===
 PIPELINE_STATES = {
     "INSTALL": {
@@ -167,22 +168,23 @@ PIPELINE_STATES = {
             },
             ensure_user_exists: {
                 "args": [KEY_USER_NAME],
-                "result": "user_ok",
                 "when": "pkg_installed",
+                "result": "user_ok",
             },
             configure_xsession: {
                 "args": [KEY_SESSION_CMD, KEY_XSESSION, KEY_SKEL_DIR, KEY_HOME_BASE],
-                "result": "xsession_ok",
                 "when": "user_ok",
+                "result": "xsession_ok",
             },
             configure_group_access: {
                 "args": [KEY_USER_NAME, KEY_GROUPS],
+                "when": "user_ok",
                 "result": "groups_ok",
             },
             enable_and_start_service: {
                 "args": [KEY_SERVICE_NAME],
+                "when": ["xsession_ok", "groups_ok"],
                 "result": "enabled",
-                "when": "xsession_ok",
             },
         },
         "label": INSTALLED_LABEL,
@@ -192,13 +194,7 @@ PIPELINE_STATES = {
     "UNINSTALL": {
         "pipeline": {
             uninstall_rdp: {
-                "args": [
-                    "job",                   
-                    KEY_SERVICE_NAME,
-                    KEY_XSESSION,
-                    KEY_HOME_BASE,
-                    KEY_SKEL_DIR,
-                ],
+                "args": ["job", KEY_SERVICE_NAME, KEY_XSESSION, KEY_HOME_BASE, KEY_SKEL_DIR],
                 "result": "uninstalled",
             },
         },
@@ -229,3 +225,4 @@ PIPELINE_STATES = {
         "post_state": "CONFIG_LOADING",
     },
 }
+

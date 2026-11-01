@@ -96,7 +96,24 @@ def is_missing(value, message: str = "") -> bool:
 # ----------------------------------------------------------------------------
 # USER / GROUP MANAGEMENT
 # ----------------------------------------------------------------------------
+def group_exists(groups):
+    """Check whether Linux groups exist."""
+    if not groups:
+        print("[group_exists] No groups provided, skipping.")
+        return False
+    groups = [groups] if isinstance(groups, str) else groups
+    all_exist = True
+    for group in groups:
+        try:
+            grp.getgrnam(group)
+            print(f"[INFO] Group '{group}' already exists.")
+        except KeyError:
+            print(f"[INFO] Group '{group}' does not exist.")
+            all_exist = False
+    return all_exist
 
+
+    
 def create_group(groups) -> bool:
     """Create one or more groups if they don't already exist."""
     if not groups:
@@ -232,6 +249,33 @@ def kill_user_session(username: str) -> bool:
     except Exception as e:
         print(f"[kill_user_session] Error killing session for '{username}': {e}")
         return False
+    
+
+def user_not_in_group(users, groups):
+    """Check whether users need adding to Linux groups."""
+    if not users or not groups:
+        print("[user_not_in_group] No users or groups provided, skipping.")
+        return False
+    users = [users] if isinstance(users, str) else users
+    groups = [groups] if isinstance(groups, str) else groups
+    needs_adding = False
+    for group in groups:
+        try:
+            group_info = grp.getgrnam(group)
+        except KeyError:
+            print(f"[WARNING] Group '{group}' does not exist.")
+            continue
+        for user in users:
+            try:
+                user_info = pwd.getpwnam(user)
+                if user_info.pw_gid == group_info.gr_gid or user in group_info.gr_mem:
+                    print(f"[INFO] User '{user}' is already in group '{group}'.")
+                else:
+                    print(f"[INFO] User '{user}' is not in group '{group}'.")
+                    needs_adding = True
+            except KeyError:
+                print(f"[WARNING] User '{user}' does not exist.")
+    return needs_adding
 
 
 def ensure_user_in_group(user: str, group: str) -> bool:
@@ -415,13 +459,14 @@ def move_to_trash(path: str | Path) -> bool:
         return False
 
 
-def remove_paths(paths) -> bool:
-    """Move files/folders to the user's trash; supports ~ and globs (*)."""
+
+def remove_paths(paths, extra_paths=None) -> bool:
+    """Move files/folders to trash, including optional additional paths; supports ~ and globs (*)."""
+    paths = [paths] if isinstance(paths, str) else list(paths or [])
+    paths.extend(extra_paths or [])
     if not paths:
         print("[remove_paths] No paths provided, nothing to do.")
         return True
-    if isinstance(paths, str):
-        paths = [paths]
     if os.geteuid() == 0 and os.environ.get("SUDO_USER"):
         user_home = Path("/home") / os.environ["SUDO_USER"]
     else:
@@ -874,17 +919,34 @@ def chown_paths(user: str, paths: list[dict], recursive: bool=False, default_gro
     return ok
 
 
-def make_dirs(dirs: list[str]) -> bool:
-    """Ensure all directories in the list exist. Returns True if successful/no-op."""
-    try:
-        for d in dirs:
+
+def make_dirs(dirs: list) -> bool:
+    """Ensure directories exist, accepting paths or dictionaries with a dest key."""
+    if not dirs:
+        print("[make_dirs] No directories to create.")
+        return True
+    success = True
+    for d in dirs:
+        if isinstance(d, dict):
+            if not d.get("dest"):
+                print(f"[make_dirs] ERROR: Missing or empty 'dest': {d}")
+                success = False
+                continue
+            d = d["dest"]
+        if not isinstance(d, (str, os.PathLike)) or not d:
+            print(f"[make_dirs] ERROR: Invalid directory path: {d!r}")
+            success = False
+            continue
+        try:
             path = os.path.expanduser(os.path.expandvars(d))
             os.makedirs(path, exist_ok=True)
             print(f"[make_dirs] Ensured directory exists: {path}")
-        return True
-    except Exception as e:
-        print(f"[make_dirs] Error creating directories: {e}")
-        return False
+        except OSError as e:
+            print(f"[make_dirs] ERROR: Could not create directory '{d}': {e}")
+            success = False
+    return success
+
+
 
 
 # ----------------------------------------------------------------------------

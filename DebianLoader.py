@@ -88,6 +88,7 @@ AVAILABLE_CONSTANTS = {
     "RDP Installer utility": ("constants.RDPConstants", 0),
     "Network Installer utility": ("constants.NetworkConstants", 0),
     "Unattended root utility": ("constants.UnattendedRootConstants", 0),
+    "Constants Tests utility": ("constants.TestsConstants", 0),
 }
 
 # === STATE ENUM ===

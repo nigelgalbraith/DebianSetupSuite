@@ -68,19 +68,18 @@ def run_pipeline(active_jobs: Dict[str, Dict[str, Any]],
                  pipeline: Dict[Any, Dict[str, Any]],
                  *, label: str, success_key: str,
                  log: Callable[[str], None]) -> None:
-    """Run a pipeline over active_jobs; supports both function-key and 'fn' styles."""
+    """Run a pipeline over active jobs and report successful jobs."""
     jobs = active_jobs or {"__setup__": {}}
     success = 0
     total = len(jobs)
     for job, meta in jobs.items():
         ctx: Dict[str, Any] = {}
+        failed = False
         for key, step in pipeline.items():
-            # --- Resolve function ---
             fn = key if callable(key) else step.get("fn")
             if not callable(fn):
                 raise ValueError(f"Invalid pipeline step: {key}")
             fn_name = fn.__name__
-            # --- Check condition ---
             if not check_when(step.get("when"), job, meta, ctx):
                 log(f"[SKIPPED] {job}: {fn_name}")
                 continue
@@ -89,17 +88,22 @@ def run_pipeline(active_jobs: Dict[str, Dict[str, Any]],
                 result = fn(*args)
                 rkey = step.get("result")
                 if rkey is not None:
-                    ctx[rkey] = result if result is not None else True
+                    ctx[rkey] = result
+                    if not result and rkey != "_":
+                        failed = True
+                        log(f"[FAIL] {job}: {fn_name}")
             except Exception as e:
+                failed = True
                 ctx.setdefault("errors", []).append({
                     "step": fn_name,
                     "error": str(e)
                 })
                 log(f"[ERROR] {job}: {fn_name} failed → {e!r}")
-        if bool(ctx.get(success_key)):
+        if not failed and bool(ctx.get(success_key)):
             success += 1
         log("")
     log(f"{label}: {success}/{total} succeeded")
+
 
 
 # ---------------------------------------------------------------------
@@ -153,50 +157,57 @@ def parse_args(consts: Any) -> argparse.Namespace:
 
 def resolve_arg(spec: Any, job: str, meta: Dict[str, Any], ctx: Dict[str, Any]) -> Any:
     """
-    Resolve a pipeline arg spec into a concrete value.
+    Resolve pipeline arguments.
 
-    Resolution order:
-      1) callable(spec) -> spec(job, meta, ctx)
-      2) ctx lookup (string key)
-      3) meta lookup (supports dotted key form; uses last segment)
-      4) literal "job" -> job name
-      5) fallback -> original spec
-
-    Example:
-        value = resolve_arg("paths.output", job, meta, ctx)
+    meta            -> Entire metadata dictionary
+    ?Key            -> Optional metadata value (None if missing)
+    ctx key         -> Previous pipeline result
+    meta.Key        -> Metadata value
+    meta.Key.field  -> Nested metadata value
+    job             -> Job name
+    otherwise       -> Original value
     """
     if callable(spec):
         return spec(job, meta, ctx)
     if isinstance(spec, str):
+        if spec == "meta":
+            return meta
+        if spec.startswith("?"):
+            return meta.get(spec[1:])
         if spec in ctx:
             return ctx[spec]
-        key = spec.split(".", 1)[-1]
-        if key in meta:
-            return meta[key]
+        if spec.startswith("meta."):
+            value = meta
+            for key in spec[5:].split("."):
+                if not isinstance(value, dict) or key not in value:
+                    return None
+                value = value[key]
+            return value
+        if spec in meta:
+            return meta[spec]
         if spec == "job":
             return job
     return spec
 
 
 def check_when(cond: Any, job: str, meta: Dict[str, Any], ctx: Dict[str, Any]) -> bool:
-    """Evaluate a step's `when` condition and return True if the step should run."""
+    """Evaluate when conditions using lists for AND and strings for OR."""
     if cond is None:
         return True
     if callable(cond):
         return bool(cond(job, meta, ctx))
+    if isinstance(cond, list):
+        return all(check_when(part, job, meta, ctx) for part in cond)
     if isinstance(cond, str):
-        for part in cond.split(" and "):
-            part = part.strip()
-            if part == "job":
-                if not job:
-                    return False
-                continue
-            key = part.split(".", 1)[-1]
-            if part not in ctx and key not in meta:
-                return False
-            if not resolve_arg(part, job, meta, ctx):
-                return False
-        return True
+        if " or " in cond:
+            return any(check_when(part, job, meta, ctx) for part in cond.split(" or "))
+        valid = cond == "job" or cond in ctx or cond in meta or cond.startswith("meta.")
+        result = valid and bool(resolve_arg(cond, job, meta, ctx))
+        if result:
+            print(f"[OK] Condition met: {cond}")
+        else:
+            print(f"[SKIP] Condition not met: {cond}")
+        return result
     return bool(resolve_arg(cond, job, meta, ctx))
 
 
