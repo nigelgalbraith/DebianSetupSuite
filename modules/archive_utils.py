@@ -127,22 +127,27 @@ def install_archive_file(archive_path: Path | str, extract_to: Path | str, strip
 
 
 def uninstall_archive_install(check_path: Path | str | None, extract_to: Path | str) -> bool:
-    """Remove CheckPath if provided, otherwise remove ExtractTo."""
-    target = check_path or extract_to
+    """Remove an extracted installation, or its check path for file-based installations."""
+    target = Path(extract_to).expanduser()
+    check = Path(check_path).expanduser() if check_path else None
+    if check and check.is_file() and target.is_dir() and check != target:
+        try:
+            check.relative_to(target)
+        except ValueError:
+            target = check
     try:
-        p = Path(target)
-        if p.is_dir():
-            shutil.rmtree(p)
-            print(f"[uninstall_archive_install] Removed directory: {p}")
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+            print(f"[uninstall_archive_install] Removed file: {target}")
             return True
-        if p.exists():
-            p.unlink()
-            print(f"[uninstall_archive_install] Removed file: {p}")
+        if target.is_dir():
+            shutil.rmtree(target)
+            print(f"[uninstall_archive_install] Removed directory: {target}")
             return True
-        print(f"[uninstall_archive_install] Target not found: {p}")
+        print(f"[uninstall_archive_install] Target not found: {target}")
         return False
-    except Exception as e:
-        print(f"[uninstall_archive_install] ERROR: {e}")
+    except OSError as exc:
+        print(f"[uninstall_archive_install] ERROR: {exc}")
         return False
 
 
@@ -172,16 +177,19 @@ def create_symlink(target: Path | str, link_path: Path | str) -> bool:
 
 
 def handle_cleanup(archive_path: Path | str, name: str | None = None) -> bool:
-    """Delete a temporary archive or DEB file."""
+    """Delete a temporary archive file or download directory."""
     try:
-        path = Path(archive_path)
+        path = Path(archive_path).expanduser()
         if name:
             path = path / f"{name}.deb"
-        path.unlink(missing_ok=True)
+        if path.is_dir() and not path.is_symlink():
+            shutil.rmtree(path)
+        else:
+            path.unlink(missing_ok=True)
         print(f"[handle_cleanup] Removed: {path}")
         return True
-    except Exception as e:
-        print(f"[handle_cleanup] ERROR: Could not remove {archive_path}: {e}")
+    except OSError as exc:
+        print(f"[handle_cleanup] ERROR: Could not remove {path}: {exc}")
         return False
 
 

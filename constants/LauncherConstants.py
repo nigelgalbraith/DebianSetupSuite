@@ -461,7 +461,10 @@ PIPELINE_STATES: Dict[str, Dict[str, Any]] = {
                 "result": "removed",
             },
             set_default_display_manager: {
-                "args": [KEY_DEFAULT_DM],
+                "args": [
+                    f"meta.{KEY_DEFAULT_DM}.package",
+                    f"meta.{KEY_DEFAULT_DM}.service",
+                ],
                 "when": "uninstalled",
                 "result": "dm_set",
             },
