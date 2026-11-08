@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """snapshot_backup.py (template).
@@ -154,6 +155,11 @@ def parse_args(description: str):
         action="store_true",
         help="Show actions without executing"
     )
+    parser.add_argument(
+        "--scheduled",
+        action="store_true",
+        help="Respect backup frequency instead of forcing a manual backup"
+    )
     return parser.parse_args()
 
 
@@ -246,15 +252,18 @@ def get_latest_snapshot(dest_folder: Path, name_prefix: str) -> Optional[Path]:
         candidates.append(p)
     if not candidates:
         return None
-    return max(candidates, key=lambda p: p.stat().st_mtime)
+    return max(candidates, key=lambda p: p.name)
 
 
 def get_latest_snapshot_mtime(dest_folder: Path, name_prefix: str) -> Optional[datetime]:
-    """Return datetime of newest snapshot dir matching name_prefix_, or None."""
+    """Return datetime from newest snapshot directory name, or None."""
     latest = get_latest_snapshot(dest_folder, name_prefix)
     if not latest:
         return None
-    return datetime.fromtimestamp(latest.stat().st_mtime)
+    try:
+        return datetime.strptime(latest.name.removeprefix(name_prefix + "_"), TS_FMT)
+    except ValueError:
+        return None
 
 
 def should_run_backup(*, frequency: str, latest_backup_time: Optional[datetime], now: datetime, manual_trigger: bool) -> bool:
@@ -290,7 +299,7 @@ def enforce_retention(dest_folder: Path, keep: int, name_prefix: str, dry_run: b
         if not p.name.startswith(name_prefix + "_"):
             continue
         candidates.append(p)
-    snapshots = sorted(candidates, key=lambda p: p.stat().st_mtime, reverse=True)
+    snapshots = sorted(candidates, key=lambda p: p.name, reverse=True)
     for p in snapshots[keep:]:
         if dry_run:
             log_message(f"[DRY-RUN] Would delete old snapshot: {p}")
@@ -318,7 +327,7 @@ def rsync_snapshot(source_dir: Path, snapshot_path: Path, previous_snapshot: Opt
     # Extra args (user-defined)
     rsync_cmd.extend(extra_args)
     if dry_run:
-        rsync_cmd.append("--dry-run")
+        rsync_cmd.extend(["--dry-run", "--no-xattrs"])
     # Ensure destination exists (tmp)
     if dry_run:
         log_message(f"[DRY-RUN] Would mkdir -p {tmp_path}")
@@ -392,6 +401,8 @@ def main() -> int:
     is_shutdown_trigger = shutdown_in_progress()
     if is_shutdown_trigger:
         log_message("TRIGGER: SHUTDOWN")
+    elif args.scheduled:
+        log_message("TRIGGER: SCHEDULED")
     else:
         log_message("TRIGGER: MANUAL/NORMAL")
 
@@ -483,6 +494,8 @@ def main() -> int:
         return 2
     # Execute jobs
     processed = 0
+    failed = 0
+    skipped = 0
     now = datetime.now()
     for job in jobs:
         try:
@@ -514,7 +527,7 @@ def main() -> int:
             # Frequency check:
             # - Manual trigger: ALWAYS run backup regardless of frequency
             # - Shutdown trigger: run only if frequency says it's due
-            manual_trigger = not is_shutdown_trigger
+            manual_trigger = not (is_shutdown_trigger or args.scheduled)
             name_prefix = f"{job.key}_{job.snapshot_prefix}_{BACKUP_WORD}"
             latest_time = get_latest_snapshot_mtime(dest_folder, name_prefix)
             if not should_run_backup(frequency=job.backup_frequency, latest_backup_time=latest_time, now=now, manual_trigger=manual_trigger):
@@ -522,10 +535,12 @@ def main() -> int:
                     f"[SKIP] Frequency '{job.backup_frequency}' not due. "
                     f"Latest snapshot: {latest_time.strftime('%Y-%m-%d %H:%M:%S') if latest_time else 'None'}"
                 )
+                skipped += 1
                 continue
             # Validate source exists
             if not job.source_dir.exists():
                 log_message(f"[ERROR] Source does not exist: {job.source_dir}")
+                failed += 1
                 continue
             # Determine previous snapshot directory for link-dest
             previous_snapshot = get_latest_snapshot(dest_folder, name_prefix)
@@ -540,12 +555,21 @@ def main() -> int:
                 processed += 1
             else:
                 log_message("[FAIL] Snapshot creation failed.")
+                failed += 1
         except KeyboardInterrupt:
             log_message("Interrupted by user.")
             return 130
         except Exception as e:
             log_message(f"[ERROR] Job '{job.key}' failed: {e!r}")
-    log_message(f"DONE: {processed}/{len(jobs)} job(s) processed.")
+            failed += 1
+    log_message(
+        f"DONE: {processed} successful, "
+        f"{skipped} skipped, {failed} failed."
+    )
+    if failed:
+        return 2
+    if skipped == len(jobs):
+        return 3
     return 0
 
 

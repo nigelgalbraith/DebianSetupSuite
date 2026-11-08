@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -10,8 +11,8 @@ defined in a JSON configuration file.
 
 This script is intended to run either:
 
-• Manually by an administrator  
-• Automatically via a systemd oneshot service attached to poweroff.target  
+• Manually by an administrator
+• Automatically via a systemd oneshot service attached to poweroff.target
 
 Each configured job can back up a directory to a compressed archive while
 optionally stopping services, enforcing folder permissions, and applying
@@ -20,15 +21,15 @@ retention rules.
 
 Key Features
 ------------
-• Multiple backup jobs defined in one JSON config file  
-• Supports tar.gz and zip archive formats  
-• Optional systemd service stop/start per job (e.g. plexmediaserver)  
-• Automatic restart of services unless shutdown is in progress  
-• Per-job retention policies (keep newest N backups)  
-• Optional backup destination ownership and permission enforcement  
-• Per-job backup frequency control (Immediately / Daily / Weekly / Monthly)  
-• Manual execution always performs a backup regardless of frequency  
-• Safe dry-run mode for testing  
+• Multiple backup jobs defined in one JSON config file
+• Supports tar.gz and zip archive formats
+• Optional systemd service stop/start per job (e.g. plexmediaserver)
+• Automatic restart of services unless shutdown is in progress
+• Per-job retention policies (keep newest N backups)
+• Optional backup destination ownership and permission enforcement
+• Per-job backup frequency control (Immediately / Daily / Weekly / Monthly)
+• Manual execution always performs a backup regardless of frequency
+• Safe dry-run mode for testing
 • Simple timestamped logging
 
 
@@ -63,10 +64,10 @@ Dry-Run Mode
 ------------
 In dry-run mode:
 
-• No files are created or deleted  
-• No services are stopped or started  
-• No system configuration changes occur  
-• All actions are logged with "[DRY-RUN]" messages  
+• No files are created or deleted
+• No services are stopped or started
+• No system configuration changes occur
+• All actions are logged with "[DRY-RUN]" messages
 
 This allows safe testing of configuration and logic.
 
@@ -75,9 +76,9 @@ Shutdown Behavior
 -----------------
 When the script runs during system shutdown:
 
-• Services configured in a job are stopped if currently running  
-• Backups are created  
-• Services are **NOT restarted** because the system is shutting down  
+• Services configured in a job are stopped if currently running
+• Backups are created
+• Services are **NOT restarted** because the system is shutting down
 
 When run manually:
 
@@ -92,10 +93,10 @@ Jobs may specify:
 
 Supported values (case-insensitive):
 
-• Immediately  
-• Daily  
-• Weekly  
-• Monthly  
+• Immediately
+• Daily
+• Weekly
+• Monthly
 
 Behavior:
 
@@ -115,20 +116,20 @@ Configuration is loaded from JSON and must define a top-level object:
 
 Each job can specify:
 
-• source_dir          – directory to back up  
-• backup_root         – destination root folder  
-• keep                – number of archives to retain  
-• archive_prefix      – filename prefix for generated archives  
-• format              – archive format (tar.gz or zip)  
-• backupFrequency     – Immediately / Daily / Weekly / Monthly  
+• source_dir          – directory to back up
+• backup_root         – destination root folder
+• keep                – number of archives to retain
+• archive_prefix      – filename prefix for generated archives
+• format              – archive format (tar.gz or zip)
+• backupFrequency     – Immediately / Daily / Weekly / Monthly
 
 Optional fields:
 
-• stop_service        – systemd service to stop before backup  
-• timeout_stop_sec    – seconds to wait for service to stop  
-• backupGroup         – group to ensure exists for backup access  
-• backupUsers         – users added to backup group  
-• protected_folder    – enforce owner/group/permissions on destination  
+• stop_service        – systemd service to stop before backup
+• timeout_stop_sec    – seconds to wait for service to stop
+• backupGroup         – group to ensure exists for backup access
+• backupUsers         – users added to backup group
+• protected_folder    – enforce owner/group/permissions on destination
 
 Example job:
 
@@ -635,6 +636,8 @@ def main() -> int:
         return 2
     # Execute backup jobs
     processed = 0
+    failed = 0
+    skipped = 0
     for job in jobs:
         try:
             log_message(f"==> Job '{job.key}'")
@@ -679,6 +682,7 @@ def main() -> int:
                     f"[SKIP] Frequency '{job.backup_frequency}' not due. "
                     f"Latest backup: {latest.strftime('%Y-%m-%d %H:%M:%S') if latest else 'None'}"
                 )
+                skipped += 1
                 continue
             was_active = False
             # Optional stop service (only if it was running)
@@ -691,6 +695,7 @@ def main() -> int:
             # Validate source exists
             if not job.source_dir.exists():
                 log_message(f"[ERROR] Source does not exist: {job.source_dir}")
+                failed += 1
                 continue
             # Create archive (atomic .tmp then rename)
             ts = now.strftime(TS_FMT)
@@ -739,6 +744,7 @@ def main() -> int:
                 processed += 1
             else:
                 log_message("[FAIL] Archive creation failed.")
+                failed += 1
             # Restart service only if:
             # - job requested stop/start AND it was active when we started
             # - NOT during shutdown
@@ -752,8 +758,16 @@ def main() -> int:
             return 130
         except Exception as e:
             log_message(f"[ERROR] Job '{job.key}' failed: {e!r}")
+            failed += 1
     # Final summary
-    log_message(f"DONE: {processed}/{len(jobs)} job(s) processed.")
+    log_message(
+        f"DONE: {processed} successful, "
+        f"{skipped} skipped, {failed} failed."
+    )
+    if failed:
+        return 2
+    if skipped == len(jobs):
+        return 3
     return 0
 
 

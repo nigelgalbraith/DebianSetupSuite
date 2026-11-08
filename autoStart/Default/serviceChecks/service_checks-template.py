@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -12,6 +13,7 @@ import json
 import subprocess
 import sys
 import shutil
+from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +36,8 @@ class Check:
     service: str
     description: str
     status: Dict[str, Dict[str, str]]
+    type: str
+    status_file: Optional[str]
 
 # =====================
 # LOGGING & CONFIG
@@ -62,6 +66,8 @@ def parse_checks(cfg: Dict[str, Any]) -> List[Check]:
                 service=spec["service"],
                 description=spec["description"],
                 status=spec["status"],
+                type=spec.get("type", "Startup"),
+                status_file=spec.get("status_file"),
             )
         )
     return checks
@@ -117,6 +123,24 @@ def get_service_status(
                     break
     return exit_code, last_run or "Unknown"
 
+def get_stop_status(
+    status_file: str,
+) -> Tuple[Optional[int], str]:
+    """Return the last exit code and run time for a shutdown service."""
+    try:
+        exit_code, last_run = Path(status_file).read_text(
+            encoding="utf-8"
+        ).strip().split("|", 1)
+        timestamp = datetime.fromisoformat(last_run)
+        last_run = timestamp.astimezone(
+            ZoneInfo("Pacific/Auckland")
+        ).strftime("%a %Y-%m-%d %H:%M:%S %Z")
+        return int(exit_code), last_run
+    except (OSError, ValueError, TypeError):
+        return None, "Unknown"
+
+
+
 # =====================
 # HTML
 # =====================
@@ -130,6 +154,7 @@ def build_checks_html(
             f"""
             <tr>
                 <td>{result["description"]}</td>
+                <td>{result["type"]}</td>
                 <td class="status {result["class"]}">
                     {result["result"]}
                 </td>
@@ -198,13 +223,21 @@ def main() -> int:
     for check in checks:
         log_message(f"Checking service: {check.service}")
         # Read the service exit status and last run time.
-        exit_code, last_run = get_service_status(
-            check.service
-        )
+        if check.type in ("Startup", "Scheduled"):
+            exit_code, last_run = get_service_status(
+                check.service
+            )
+        elif check.type == "Shutdown":
+            exit_code, last_run = get_stop_status(
+                check.status_file
+            )
+        else:
+            exit_code, last_run = None, "Unknown"
         # Record an unknown result if the service status cannot be read.
         if exit_code is None:
             results.append({
                 "description": check.description,
+                "type": check.type,
                 "result": "UNKNOWN",
                 "class": "unknown",
                 "message": "Unable to read service exit status.",
@@ -221,6 +254,7 @@ def main() -> int:
         if status is None:
             results.append({
                 "description": check.description,
+                "type": check.type,
                 "result": "UNKNOWN",
                 "class": "unknown",
                 "message": f"Unknown exit status: {exit_code}",
@@ -234,6 +268,7 @@ def main() -> int:
         # Record the configured result for the service.
         results.append({
             "description": check.description,
+            "type": check.type,
             "result": status["result"],
             "class": status["class"],
             "message": status["description"],
