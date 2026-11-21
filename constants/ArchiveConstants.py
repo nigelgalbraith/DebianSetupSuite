@@ -153,12 +153,12 @@ PIPELINE_STATES = {
                 "when": "archive_path",
                 "result": "installed",
             },
-            handle_cleanup: {
-                "args": [KEY_DOWNLOAD_PATH],
-                "when": "installed",
-            },
             run_commands: {
                 "args": [KEY_POST_INSTALL],
+                "when": "installed",
+            },
+            handle_cleanup: {
+                "args": [KEY_DOWNLOAD_PATH],
                 "when": "installed",
             },
         },
